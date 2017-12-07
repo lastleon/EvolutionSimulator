@@ -5,13 +5,13 @@ public class Lebewesen{
   private int posX, posY;
   private int fressrate;
   
-  public Lebewesen(int x, int y){
-    posX = x;
-    posY = y; 
+  public Lebewesen(){
+    posX = (int)random(0,fensterGroesse);
+    posY = (int)random(0,fensterGroesse); 
   }
   
   public void drawLebewesen(){
     fill((int)random(0,256), (int)random(0,256), (int)random(0,256));
-    ellipse((int)random(0,fensterGroesse), (int)random(0,fensterGroesse), durchmesser, durchmesser);
+    ellipse(posX, posY, durchmesser, durchmesser);
   }
 }

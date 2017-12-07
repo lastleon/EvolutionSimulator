@@ -4,12 +4,11 @@ public class Welt{
   private Feld[][] welt;
   private ArrayList<Lebewesen> bewohner;
   
-  private int weltGroesse;
   private int fB;
   
-  public Welt(int weltGroesse, int lw){
+  public Welt(int weltG, int lw){
     
-    this.weltGroesse = weltGroesse;
+    weltGroesse = weltG;
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
     fB = (int)fensterGroesse/weltGroesse;
@@ -28,7 +27,7 @@ public class Welt{
     // generiert Anfangs-Lebewesen
     bewohner = new ArrayList<Lebewesen>(lw);
     for(int i=0; i<lw; i++){
-      bewohner.add(new Lebewesen((int)random(0,fensterGroesse),(int)random(0,fensterGroesse)));
+      bewohner.add(new Lebewesen());
     }
     
   }
@@ -57,6 +56,11 @@ public class Welt{
   //// Getter
   public Lebewesen[] getLebewesen(){
     return bewohner.toArray(new Lebewesen[bewohner.size()]);
+  }
+  
+  
+  public int getWeltGroesse(){
+    return weltGroesse;
   }
   
 }

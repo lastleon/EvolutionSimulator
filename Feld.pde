@@ -32,5 +32,16 @@ class Feld{
     } else fill(0, 0, 255);
     rect(posX, posY, feldBreite, feldBreite);
   }
+}
+Feld getFeld(int x,int y){
+  Feld returnFeld =new Feld(0,0,0,0);
+  for(int i =0;i < weltGroesse;i++){
+    for (Feld a: welt.welt[i]){
+      if(a.posX == x && a.posY == y){
+        returnFeld = a;
+      }
+    }  
+  }
+  return returnFeld;
   
 }
