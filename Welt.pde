@@ -1,6 +1,5 @@
 public class Welt{
   
-  // getter fehlen noch
   private Feld[][] welt;
   private ArrayList<Lebewesen> bewohner;
   
@@ -39,9 +38,10 @@ public class Welt{
     }
     
   }
-  // update Methode wird immer in draw (Mainloop) gerufen
   
+  // update Methode wird immer in draw (Mainloop) gerufen
   public void update(){
+    
   }
   
   // zeichnet die Welt
@@ -52,8 +52,12 @@ public class Welt{
       }
     }
   }
-  
-  // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt)
+  public void showLebewesen(){
+    for(Lebewesen lw : bewohner){
+      lw.drawLebewesen();
+    }
+  }
+  // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
   public void showLebewesen(Lebewesen[] lwArray){
     for(Lebewesen lw : lwArray){
       lw.drawLebewesen();
@@ -75,7 +79,7 @@ public class Welt{
   }
   
   public Feld getFeld(int x, int y){
-    return welt[(x-(x % fB)) / fB][(y-(y % fB)) / fB];
+    return welt[(x-(x % fB)) / fB][(y-(y % fB)) / fB];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
     
   /**Feld returnFeld = new Feld(0,0,0,0);
     for(int i=0; i<weltGroesse; i++){
@@ -85,7 +89,7 @@ public class Welt{
         }
       }  
     }
-    return returnFeld;**/
+    return returnFeld;**/ 
    
   }
   

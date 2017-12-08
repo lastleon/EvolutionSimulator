@@ -33,7 +33,7 @@ class Feld{
     return energiewert;
   }
   
-  public void setEnergie(int x){ // mal schauen
+  public void setEnergie(int x){
     energiewert = x;
   }
 }

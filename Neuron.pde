@@ -1,5 +1,5 @@
 class Neuron{
-  
+  // kommt noch
   private float input;
   private float weight;
   
