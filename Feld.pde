@@ -1,28 +1,46 @@
 class Feld{
   
-  private int posX, posY;
+  private float posX, posY;
   private float nHoehe; //noise-Hoehe
-  
   private int feldBreite;
-  private int regenerationsrate  = 3;
-  private int energiewert = 80;
-  private int maxEnergiewert = 80;
+  private int regenerationsrate;
+  private int energiewert;
+  private int maxEnergiewert;
+  
+  private int meeresspiegel = 45;
 
   Feld(int x , int y, float h, int fB){
     posX = x;
     posY = y;
     nHoehe = h;
     feldBreite = fB;
+    
+    if(this.isLand()){
+      regenerationsrate = 1;
+      energiewert = 80;
+      maxEnergiewert = 80;
+    } else {
+      regenerationsrate = 0;
+      energiewert = 0;
+      maxEnergiewert = 0;
+    }
+  }
+  
+  public void regenerieren(){
+    energiewert += regenerationsrate;
+    if (energiewert > maxEnergiewert){
+      energiewert = maxEnergiewert;
+    }
   }
   
   public boolean isLand(){
-    if (nHoehe>45){
+    if (nHoehe>meeresspiegel){
       return true;
     } else return false;
   }
   
   public void drawFeld(){
-    if(nHoehe>45){
+    if(nHoehe>meeresspiegel){
       fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
     } else fill(0, 0, map(nHoehe, 0, 45, 0, 140));
     rect(posX, posY, feldBreite, feldBreite);

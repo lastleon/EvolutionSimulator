@@ -41,7 +41,17 @@ public class Welt{
   
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update(){
-    
+    for(Lebewesen lw : bewohner){
+      lw.bewegen(4,random(0,361)); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
+      lw.fressen(); // Fressen ist noch ein bisschen fehlerhaft
+    }
+    for(int x=0; x<weltGroesse; x++){
+      for(Feld f : welt[x]){
+        f.regenerieren();
+      }
+    }
+    showWelt();
+    showLebewesen();
   }
   
   // zeichnet die Welt
@@ -91,6 +101,10 @@ public class Welt{
     }
     return returnFeld;**/ 
    
+  }
+  
+  public Feld[][] getWelt(){
+    return welt;
   }
   
 }
