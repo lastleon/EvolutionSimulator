@@ -1,6 +1,6 @@
-Fühler:
-	- Fühler fährt autonom
-	- 2 Fühler
+FÃ¼hler:
+	- FÃ¼hler fÃ¤hrt autonom
+	- 2 FÃ¼hler
 
 Fortpflanzung:
 	-asexuell & sexuell
@@ -14,7 +14,7 @@ Gene:
 
 NN:
 input:
-- Fühler
+- FÃ¼hler
 	- Feldenergie
 	- Gegner
 	- genetische Differenz (alle gene werden verglichen)
@@ -31,5 +31,5 @@ Output:
 - Geschwindigkeit
 - Rotation
 - Fortpflanzungswille
-- Attakieren
+- Attackieren
 - Fressen
