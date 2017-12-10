@@ -1,17 +1,9 @@
-class Neuron{
-  // kommt noch
-  private float input;
-  private float weight;
+public abstract class Neuron{
   
-  Neuron(float i){
-    input = i;
-  }
   // getter
-  public float getOutput(){
-    return input*weight;
-  }
-  // setter
-  public void setWeight(float w){
-    weight = w;
-  }
+  public abstract float getWert();
+  
+  // setter 
+  public abstract void setWert(float input);
+  
 }

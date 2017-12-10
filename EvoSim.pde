@@ -24,6 +24,8 @@ void setup(){
 }
 
 void draw(){
+  NeuralNetwork NN = new NeuralNetwork(4,5);
+  println(NN.getGeschwindigkeit());
   map.update();
 }
 
