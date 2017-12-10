@@ -91,13 +91,13 @@ public class Welt{
     return weltGroesse;
   }
   
-  public Feld getFeld(int x, int y){
+  public Feld getFeld(int x, int y){ // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
     float xFeld = (x - (x%fB)) / fB;
     float yFeld = (y - (y%fB)) / fB;
-    if (xFeld == 100){
+    if (xFeld == weltGroesse){
       xFeld = 0;
     }
-    if (yFeld == 100){
+    if (yFeld == weltGroesse){
       yFeld = 0;
     }
     return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird

@@ -10,11 +10,11 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-Welt map = new Welt(100, 70);
+Welt map = new Welt(100, 150);
 
 void setup(){
   size(1000,1000);
-  stroke(20);
+  stroke(1);
   skalierungsfaktor = 1;
   xNeu = 0;
   yNeu = 0;

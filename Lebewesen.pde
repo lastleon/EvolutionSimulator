@@ -39,10 +39,10 @@ public class Lebewesen{
   }
   
   // Bewewgung
-  public void bewegen(float v, float angle){ // angle beschreibt den Winkel, in den das Lebewesen will (nicht die Änderung!)
+  public void bewegen(float v, float angle){ // Rotationswinkel in Grad
     if (energie-verbrauchBewegung>=0 && v<maxGeschwindigkeit && v>0){ // 3. Fall sollte nicht auftreten, weil das NN die Richtung nicht über v, sondern angle bestimmt
       energie-=verbrauchBewegung;
-      geschwindigkeit.rotate(radians(angle-degrees(geschwindigkeit.heading())));
+      geschwindigkeit.rotate(radians(angle));
       geschwindigkeit.setMag(v);
       
       // im Wasser bewegen sich die Lebewesen langsamer
