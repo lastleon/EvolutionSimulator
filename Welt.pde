@@ -1,6 +1,5 @@
 public class Welt{
   
-  // getter fehlen noch
   private Feld[][] welt;
   private ArrayList<Lebewesen> bewohner;
   
@@ -27,9 +26,35 @@ public class Welt{
     // generiert Anfangs-Lebewesen
     bewohner = new ArrayList<Lebewesen>(lw);
     for(int i=0; i<lw; i++){
-      bewohner.add(new Lebewesen());
+      int posX;
+      int posY;
+      
+      do {
+        posX = (int)random(0,fensterGroesse);
+        posY = (int)random(0,fensterGroesse);
+      } while (!this.getFeld(posX,posY).isLand());
+      
+      bewohner.add(new Lebewesen(posX,posY));
     }
     
+  }
+  
+  // update Methode wird immer in draw (Mainloop) gerufen
+  public void update(){
+    translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
+    scale(skalierungsfaktor);
+    background(0,128,255);
+    for(Lebewesen lw : bewohner){
+      lw.bewegen(4,/**random(0,361)**/30); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
+      lw.fressen(); // Fressen ist noch ein bisschen fehlerhaft
+    }
+    for(int x=0; x<weltGroesse; x++){
+      for(Feld f : welt[x]){
+        f.regenerieren();
+      }
+    }
+    showWelt();
+    showLebewesen();
   }
   
   // zeichnet die Welt
@@ -40,8 +65,12 @@ public class Welt{
       }
     }
   }
-  
-  // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt)
+  public void showLebewesen(){
+    for(Lebewesen lw : bewohner){
+      lw.drawLebewesen();
+    }
+  }
+  // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
   public void showLebewesen(Lebewesen[] lwArray){
     for(Lebewesen lw : lwArray){
       lw.drawLebewesen();
@@ -58,9 +87,35 @@ public class Welt{
     return bewohner.toArray(new Lebewesen[bewohner.size()]);
   }
   
-  
   public int getWeltGroesse(){
     return weltGroesse;
+  }
+  
+  public Feld getFeld(int x, int y){
+    float xFeld = (x - (x%fB)) / fB;
+    float yFeld = (y - (y%fB)) / fB;
+    if (xFeld == 100){
+      xFeld = 0;
+    }
+    if (yFeld == 100){
+      yFeld = 0;
+    }
+    return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
+    
+  /**Feld returnFeld = new Feld(0,0,0,0);
+    for(int i=0; i<weltGroesse; i++){
+      for (Feld a: welt.welt[i]){
+        if(a.posX == x && a.posY == y){
+          returnFeld = a;
+        }
+      }  
+    }
+    return returnFeld;**/ 
+   
+  }
+  
+  public Feld[][] getWelt(){
+    return welt;
   }
   
 }
