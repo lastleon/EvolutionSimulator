@@ -1,0 +1,35 @@
+Fühler:
+	- Fühler fährt autonom
+	- 2 Fühler
+
+Fortpflanzung:
+	-asexuell & sexuell
+
+Gene:
+	- Gewichte im NN
+	- Max. Geschwindigkeit
+	- Mutationsrate
+	- Angriffswert
+	- Verteidigung (kann nicht 0 sein)
+
+NN:
+input:
+- Fühler
+	- Feldenergie
+	- Gegner
+	- genetische Differenz (alle gene werden verglichen)
+	- gegnerische Energie
+	- Feldart
+- eigene Farbe
+- eigene Energie
+- Feldart
+- Geschwindigkeit
+- Memory
+- Bias
+
+Output:
+- Geschwindigkeit
+- Rotation
+- Fortpflanzungswille
+- Attakieren
+- Fressen
