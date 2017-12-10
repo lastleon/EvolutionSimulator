@@ -53,11 +53,12 @@ public class Lebewesen{
       }
       
       
+      
       // Lebewesen werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
-      if (position.x > fensterGroesse){ // wenn zu weit rechts
+      if (position.x > fensterGroesse){ // wenn zu weit rechts        
         position.set(position.x-fensterGroesse, position.y);
       }
-      if (position.x < 0){ // wenn zu weit links
+      if (position.x < 0){ // wenn zu weit links       
         position.set(fensterGroesse+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
       }
       if (position.y > fensterGroesse){ // wenn zu weit unten

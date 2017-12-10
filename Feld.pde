@@ -2,10 +2,10 @@ class Feld{
   
   private float posX, posY;
   private float nHoehe; //noise-Hoehe
+  private float regenerationsrate;
+  private float energiewert;
+  private float maxEnergiewert;
   private int feldBreite;
-  private int regenerationsrate;
-  private int energiewert;
-  private int maxEnergiewert;
   
   private int meeresspiegel = 45;
 
@@ -16,7 +16,7 @@ class Feld{
     feldBreite = fB;
     
     if(this.isLand()){
-      regenerationsrate = 1;
+      regenerationsrate = 0.4;
       energiewert = 80;
       maxEnergiewert = 80;
     } else {
@@ -47,7 +47,7 @@ class Feld{
   }
   
   // getter(bisher)
-  public int getEnergie(){
+  public float getEnergie(){
     return energiewert;
   }
   

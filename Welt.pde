@@ -41,8 +41,11 @@ public class Welt{
   
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update(){
+    translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
+    scale(skalierungsfaktor);
+    background(0,128,255);
     for(Lebewesen lw : bewohner){
-      lw.bewegen(4,random(0,361)); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
+      lw.bewegen(4,/**random(0,361)**/30); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
       lw.fressen(); // Fressen ist noch ein bisschen fehlerhaft
     }
     for(int x=0; x<weltGroesse; x++){
@@ -89,7 +92,15 @@ public class Welt{
   }
   
   public Feld getFeld(int x, int y){
-    return welt[(x-(x % fB)) / fB][(y-(y % fB)) / fB];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
+    float xFeld = (x - (x%fB)) / fB;
+    float yFeld = (y - (y%fB)) / fB;
+    if (xFeld == 100){
+      xFeld = 0;
+    }
+    if (yFeld == 100){
+      yFeld = 0;
+    }
+    return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
     
   /**Feld returnFeld = new Feld(0,0,0,0);
     for(int i=0; i<weltGroesse; i++){
