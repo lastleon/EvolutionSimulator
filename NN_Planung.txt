@@ -30,8 +30,9 @@ input:
 Output:
 - Geschwindigkeit
 - Rotation
-- Fortpflanzungswille
-- Attackieren
+//- Fortpflanzungswille
+//- Attackieren
 - Fressen
-- Fühlerdrehen1
-- Fühlerdrehen1
+//- Fühlerdrehen1
+//- Fühlerdrehen1
+- Memory
