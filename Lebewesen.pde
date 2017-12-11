@@ -12,25 +12,28 @@ public class Lebewesen{
   private color fellFarbe;
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
+  private NeuralNetwork NN;
   
   // sollte bei 1. Generation verwendet werden
   Lebewesen(int x, int y){
     fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
-    
+    NeuralNetwork NN = new NeuralNetwork(2,5);
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
+   
   }
   
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann
   Lebewesen(int x, int y, color c){
     fellFarbe = c;
-    
+    NeuralNetwork NN = new NeuralNetwork(2,5);
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
+    
   }
   
   public void drawLebewesen(){
@@ -39,15 +42,15 @@ public class Lebewesen{
   }
   
   // Bewewgung
-  public void bewegen(float v, float angle){ // angle beschreibt den Winkel, in den das Lebewesen will (nicht die Änderung!)
+  public void bewegen(float v, float angle){ // Rotationswinkel in Grad
     if (energie-verbrauchBewegung>=0 && v<maxGeschwindigkeit && v>0){ // 3. Fall sollte nicht auftreten, weil das NN die Richtung nicht über v, sondern angle bestimmt
       energie-=verbrauchBewegung;
-      geschwindigkeit.rotate(radians(angle-degrees(geschwindigkeit.heading())));
+      geschwindigkeit.rotate(radians(angle));
       geschwindigkeit.setMag(v);
       
       // im Wasser bewegen sich die Lebewesen langsamer
-      if(!map.getFeld((int)position.x,(int)position.y).isLand()){
-        position.add(geschwindigkeit.mult(1-wasserreibung));
+      if(map.getFeld((int)position.x,(int)position.y).isLand() ==0){
+        position.add(geschwindigkeit);
       } else {
         position.add(geschwindigkeit);
       }
@@ -69,6 +72,16 @@ public class Lebewesen{
       }
       
     }
+  }
+  //INputen
+  void input(){
+    // Farbe
+    // NN.inputSchicht[0].setWert(green(fellFarbe));    
+    // NN.inputSchicht[1].setWert(red(fellFarbe));
+    // NN.inputSchicht[2].setWert(blue(fellFarbe));
+    NN.inputSchicht[0].setWert(energie);
+    NN.inputSchicht[1].setWert(map.getFeld((int)position.x,(int)position.y).isLand());
+  
   }
   // Fressen
   public void fressen(){

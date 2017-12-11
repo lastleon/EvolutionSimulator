@@ -15,7 +15,7 @@ class Feld{
     nHoehe = h;
     feldBreite = fB;
     
-    if(this.isLand()){
+    if(this.isLand() == 1){
       regenerationsrate = 0.4;
       energiewert = 80;
       maxEnergiewert = 80;
@@ -33,10 +33,10 @@ class Feld{
     }
   }
   
-  public boolean isLand(){
+  public int isLand(){
     if (nHoehe>meeresspiegel){
-      return true;
-    } else return false;
+      return 1;
+    } else return 0;
   }
   
   public void drawFeld(){

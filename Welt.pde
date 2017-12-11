@@ -32,7 +32,7 @@ public class Welt{
       do {
         posX = (int)random(0,fensterGroesse);
         posY = (int)random(0,fensterGroesse);
-      } while (!this.getFeld(posX,posY).isLand());
+      } while (this.getFeld(posX,posY).isLand()==0);
       
       bewohner.add(new Lebewesen(posX,posY));
     }
@@ -46,7 +46,8 @@ public class Welt{
     background(0,128,255);
     for(Lebewesen lw : bewohner){
       lw.bewegen(4,/**random(0,361)**/30); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
-      lw.fressen(); // Fressen ist noch ein bisschen fehlerhaft
+      lw.fressen();
+      lw.input();// Fressen ist noch ein bisschen fehlerhaft
     }
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){
@@ -91,13 +92,13 @@ public class Welt{
     return weltGroesse;
   }
   
-  public Feld getFeld(int x, int y){
+  public Feld getFeld(int x, int y){ // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
     float xFeld = (x - (x%fB)) / fB;
     float yFeld = (y - (y%fB)) / fB;
-    if (xFeld == 100){
+    if (xFeld == weltGroesse){
       xFeld = 0;
     }
-    if (yFeld == 100){
+    if (yFeld == weltGroesse){
       yFeld = 0;
     }
     return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
