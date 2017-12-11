@@ -45,8 +45,11 @@ public class Welt{
     scale(skalierungsfaktor);
     background(0,128,255);
     for(Lebewesen lw : bewohner){
-      lw.bewegen(4,/**random(0,361)**/30); // Ort dieser Methoden wird noch umgelagert && input kommt von NN
-      lw.fressen(); // Fressen ist noch ein bisschen fehlerhaft
+      lw.input();
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw),lw.NN.getRotation());
+      lw.fressen();
+      lw.erinnern(lw.NN.getMemory());
+      lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
     }
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){

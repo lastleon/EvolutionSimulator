@@ -1,17 +1,19 @@
 public class WorkingNeuron extends Neuron{
   
   float wert;
+  Connection[] inputC;
   
-  WorkingNeuron(Connection[] inputC){
-    for(Connection c : inputC){
-      wert += c.getWert();
-    }
-    wert = AktivierungsFunktion.Sigmoid(wert);
+  WorkingNeuron(Connection[] iC){
+    inputC = iC;
   }
   
   // getter
   @Override
   public float getWert(){
+    for(Connection c : inputC){
+      wert += c.getWert();
+    }
+    wert = AktivierungsFunktion.Sigmoid(wert); // teilen durch inputV.length
     return wert;
   }
   // setter
@@ -19,6 +21,4 @@ public class WorkingNeuron extends Neuron{
   public void setWert(float input){
     wert = input;
   }
-  
-  
 }

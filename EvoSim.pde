@@ -10,7 +10,7 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-Welt map = new Welt(100, 150);
+Welt map = new Welt(100, 1);
 
 void setup(){
   size(1000,1000);
@@ -24,8 +24,6 @@ void setup(){
 }
 
 void draw(){
-  NeuralNetwork NN = new NeuralNetwork(4,5);
-  println(NN.getGeschwindigkeit());
   map.update();
 }
 

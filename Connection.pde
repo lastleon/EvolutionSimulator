@@ -1,5 +1,4 @@
 class Connection{
-  // kommt noch
   private Neuron inputN;
   private float weight;
   
