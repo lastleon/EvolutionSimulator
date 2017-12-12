@@ -128,7 +128,7 @@ public class NeuralNetwork{
     return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
   }
   public float getRotation(){
-    return outputSchicht[1].getWert()*180;
+    return outputSchicht[1].getWert() * 180;
     
   }
   public float getMemory(){

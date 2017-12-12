@@ -13,7 +13,10 @@ public class Lebewesen{
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
   private float energieverbrauch = 10;
-  private boolean alive = true;
+  private boolean lebend = true;
+  
+  private Fuehler fuehler1;
+  private Fuehler fuehler2;
   
   private NeuralNetwork NN;
   private float memory = 1; // GEN
@@ -28,6 +31,9 @@ public class Lebewesen{
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
+    
+    fuehler1 = new Fuehler(this, random(0,360));
+    fuehler2 = new Fuehler(this, random(0,360));
   }
   
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann
@@ -43,6 +49,8 @@ public class Lebewesen{
   
   public void drawLebewesen(){
     fill(fellFarbe);
+    fuehler1.drawFuehler();
+    fuehler2.drawFuehler();
     ellipse(position.x, position.y, durchmesser, durchmesser);
   }
   
@@ -126,8 +134,10 @@ public class Lebewesen{
   
   // getter 
   public boolean getStatus(){
-    if(energie<0)alive = false;
-    return alive;
+    if(energie<0){
+      lebend = false;
+    }
+    return lebend;
   }
   public float getMaxGeschwindigkeit(){
     return maxGeschwindigkeit;

@@ -2,7 +2,7 @@
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 final int fensterGroesse = 1000;
 private int weltGroesse;
-private float xNeu, yNeu, skalierungsfaktor;
+private float skalierungsfaktor;
 private float xOffset = 0.0;
 private float yOffset = 0.0;
 private float xOffsetGesamt = 0.0;
@@ -16,8 +16,6 @@ void setup(){
   size(1000,1000);
   stroke(1);
   skalierungsfaktor = 1;
-  xNeu = 0;
-  yNeu = 0;
   map.showWelt();
   map.showLebewesen(map.getLebewesen());
   frameRate(50);
@@ -32,8 +30,6 @@ void mouseWheel(MouseEvent event){
   float e = event.getCount();
   
   skalierungsfaktor -= e / 10;
-  xNeu = e * ((mouseX - xOffset) * skalierungsfaktor) / 100;
-  yNeu = e * ((mouseY - yOffset) * skalierungsfaktor) / 100;
   
 }
 void mouseDragged(){

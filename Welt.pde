@@ -2,9 +2,14 @@ public class Welt{
   
   private Feld[][] welt;
   private ArrayList<Lebewesen> bewohner;
+  private int lwZahl;
   
   private int fB;
+  
+  
   public Welt(int weltG, int lw){
+    
+    lwZahl = lw;
     
     weltGroesse = weltG;
     
@@ -37,23 +42,43 @@ public class Welt{
     }
     
   }
-
+  // entfernt Tote
+  public void kill(){
+    ArrayList<Lebewesen> bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
+    for(Lebewesen lw : bewohnerCopy){
+      if(!lw.getStatus()){
+        bewohner.remove(bewohner.indexOf(lw));
+      }
+    }
+  }
   
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update(){
     translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
     scale(skalierungsfaktor);
     background(0,128,255);
+    int bewohnerZahl = bewohner.size();
+    if(bewohnerZahl < lwZahl){
+      for(int i=0; i<lwZahl-bewohnerZahl; i++){
+        int posX;
+        int posY;
+        do {
+          posX = (int)random(0,fensterGroesse);
+          posY = (int)random(0,fensterGroesse);
+        } while (!this.getFeld(posX,posY).isLand());
+        
+        bewohner.add(new Lebewesen(posX,posY));
+      }
+    }
     for(Lebewesen lw : bewohner){
-      
       lw.input();
       lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
       lw.fressen();
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       
-    
-}
+    }
+    kill();
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){
         f.regenerieren();
@@ -107,21 +132,20 @@ public class Welt{
       yFeld = 0;
     }
     return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
-    
-  /**Feld returnFeld = new Feld(0,0,0,0);
-    for(int i=0; i<weltGroesse; i++){
-      for (Feld a: welt.welt[i]){
-        if(a.posX == x && a.posY == y){
-          returnFeld = a;
-        }
-      }  
-    }
-    return returnFeld;**/ 
    
   }
   
   public Feld[][] getWelt(){
     return welt;
   }
+  
+    public Lebewesen getTier(int x,int y){
+    for(Lebewesen a:bewohner){
+      if(a.position.x - x > -a.durchmesser/4 && a.position.x - x < a.durchmesser/4 && a.position.y - y > -a.durchmesser/4 && a.position.y - y < -a.durchmesser/4){
+        return a;
+      }
+    }
+    return null; 
+}
   
 }
