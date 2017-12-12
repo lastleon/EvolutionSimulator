@@ -18,7 +18,7 @@ public class NeuralNetwork{
     connections1 = new Connection[hS1][iS];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iS; i2++){
-        connections1[i][i2] = new Connection(inputSchicht[i2], random(0.01,2));
+        connections1[i][i2] = new Connection(inputSchicht[i2], random(0,1));
       }
     }
     
@@ -28,12 +28,14 @@ public class NeuralNetwork{
       hiddenSchicht1[i] = new WorkingNeuron(connections1[i]);
     }
     
+    float w2;
     // random-gewichtete connection wird erstellt // outputNeuronen werden manuell spezifiziert
     int outputNeuronen = 7; // Grund in NN_Planung.txt ersichtlich
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2], random(0.01,2));
+        w2 = randomGaussian();
+        connections2[i][i2] = new Connection(hiddenSchicht1[i2], w2);
       }
     }
     // Output Neuronen werden erstellt
@@ -53,11 +55,13 @@ public class NeuralNetwork{
       inputSchicht[i] = new InputNeuron();
     }
     
+    float w1;
     // random-gewichtete connections werden erstellt
     connections1 = new Connection[hS1][iSLaenge];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iSLaenge; i2++){
-        connections1[i][i2] = new Connection(inputSchicht[i2], random(0.01,2));
+        w1 = randomGaussian();
+        connections1[i][i2] = new Connection(inputSchicht[i2],w1);
       }
     }
     
@@ -69,11 +73,12 @@ public class NeuralNetwork{
     
     // random-gewichtete connection wird erstellt // outputNeuronen werden manuell spezifiziert
     int outputNeuronen = 6; // Grund in NN_Planung.txt ersichtlich
-    
+    float w2;
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2], random(0,1));
+        w2 = randomGaussian();
+        connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
       }
     }
     // Output Neuronen werden erstellt
@@ -86,18 +91,23 @@ public class NeuralNetwork{
   //// getter
   // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
   public InputNeuron getInputNGeschwindigkeit(){
+    
     return inputSchicht[0];
   }
   public InputNeuron getInputNFellRot(){
+   
     return inputSchicht[1];
   }
   public InputNeuron getInputNFellGruen(){
+
     return inputSchicht[2];
   }
   public InputNeuron getInputNFellBlau(){
+  
     return inputSchicht[3];
   }
   public InputNeuron getInputNEnergie(){
+    
     return inputSchicht[4];
   }
   public InputNeuron getInputNFeldart(){
@@ -118,7 +128,8 @@ public class NeuralNetwork{
     return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
   }
   public float getRotation(){
-    return outputSchicht[1].getWert() * 360;
+    return outputSchicht[1].getWert()*180;
+    
   }
   public float getMemory(){
     return outputSchicht[2].getWert();
@@ -132,7 +143,7 @@ public class NeuralNetwork{
   public int getFellBlau(){
     return (int)(outputSchicht[5].getWert() * 255);
   }
-  
+  //public float get
   
   
 }

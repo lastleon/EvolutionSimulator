@@ -4,7 +4,6 @@ public class Welt{
   private ArrayList<Lebewesen> bewohner;
   
   private int fB;
-  
   public Welt(int weltG, int lw){
     
     weltGroesse = weltG;
@@ -38,6 +37,7 @@ public class Welt{
     }
     
   }
+
   
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update(){
@@ -45,12 +45,15 @@ public class Welt{
     scale(skalierungsfaktor);
     background(0,128,255);
     for(Lebewesen lw : bewohner){
+      
       lw.input();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw),lw.NN.getRotation());
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
       lw.fressen();
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-    }
+      
+    
+}
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){
         f.regenerieren();

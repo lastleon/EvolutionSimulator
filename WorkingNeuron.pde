@@ -13,12 +13,13 @@ public class WorkingNeuron extends Neuron{
     for(Connection c : inputC){
       wert += c.getWert();
     }
-    wert = AktivierungsFunktion.Sigmoid(wert); // teilen durch inputV.length
+    wert = AktivierungsFunktion.Sigmoid(wert); 
     return wert;
   }
   // setter
   @Override
   public void setWert(float input){
+    
     wert = input;
   }
 }

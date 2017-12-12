@@ -10,7 +10,7 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-Welt map = new Welt(100, 1);
+Welt map = new Welt(100, 50);
 
 void setup(){
   size(1000,1000);
@@ -31,7 +31,7 @@ void draw(){
 void mouseWheel(MouseEvent event){
   float e = event.getCount();
   
-  skalierungsfaktor -= e / 100;
+  skalierungsfaktor -= e / 10;
   xNeu = e * ((mouseX - xOffset) * skalierungsfaktor) / 100;
   yNeu = e * ((mouseY - yOffset) * skalierungsfaktor) / 100;
   

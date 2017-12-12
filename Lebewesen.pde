@@ -4,14 +4,16 @@ public class Lebewesen{
   private PVector geschwindigkeit;
   private PVector position;
   
-  private float durchmesser = 15; // muss an Welt skaliert werden
-  private float fressrate = 5;
+  private float durchmesser = 10; // muss an Welt skaliert werden
+  private float fressrate = 20;
   private float maxGeschwindigkeit = 4; //GEN
   private float energie = 1400.0;
   private float maxEnergie = 1400.0; 
   private color fellFarbe;
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
+  private float energieverbrauch = 10;
+  private boolean alive = true;
   
   private NeuralNetwork NN;
   private float memory = 1; // GEN
@@ -47,13 +49,13 @@ public class Lebewesen{
   // NeuralNetwork input
   public void input(){
     // Geschwindigkeit
-    NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -6, 6));
+    NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -1, 1));
     // Fellfarbe
     NN.getInputNFellRot().setWert(map(red(fellFarbe), 0, 255, -1, 1));
     NN.getInputNFellGruen().setWert(map(green(fellFarbe), 0, 255, -1, 1));
     NN.getInputNFellBlau().setWert(map(blue(fellFarbe), 0, 255, -1, 1));
     // eigene Energie
-    NN.getInputNEnergie().setWert(map(energie, 0, maxEnergie, -1, 1));
+    NN.getInputNEnergie().setWert(map(energie,0,maxEnergie,-1,1));
     // Feldart
     NN.getInputNFeldart().setWert(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, -1, 1));
     // Memory
@@ -96,6 +98,7 @@ public class Lebewesen{
   }
   // Fressen
   public void fressen(){
+    energie -= energieverbrauch;
     Feld feld = map.getFeld((int)position.x,(int)position.y);
     float neueFeldEnergie = feld.getEnergie() - fressrate;
     
@@ -122,7 +125,10 @@ public class Lebewesen{
   }
   
   // getter 
-  
+  public boolean getStatus(){
+    if(energie<0)alive = false;
+    return alive;
+  }
   public float getMaxGeschwindigkeit(){
     return maxGeschwindigkeit;
   }
