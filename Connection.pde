@@ -11,6 +11,9 @@ class Connection{
   public float getWert(){
     return inputN.getWert()*weight;
   }
+  public float getWeight(){
+    return weight;
+  }
   // setter
   public void setWeight(float w){
     weight = w;

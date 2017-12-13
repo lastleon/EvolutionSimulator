@@ -1,19 +1,23 @@
 
 public class Lebewesen{
   
+  public final static int maxRotationswinkel = 10;
+  
   private PVector geschwindigkeit;
   private PVector position;
   
   private float durchmesser = 10; // muss an Welt skaliert werden
   private float fressrate = 20;
-  private float maxGeschwindigkeit = 4; //GEN
+  private float maxGeschwindigkeit = 3; //GEN
   private float energie = 1400.0;
   private float maxEnergie = 1400.0; 
-  private color fellFarbe;
+  private color fellFarbe = fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
-  private float energieverbrauch = 10;
+  private float energieverbrauch = 3;
   private boolean lebend = true;
+  private float geburtsenergie = 100;
+  private float reproduktionsWartezeit = 0.1;
   
   private Fuehler fuehler1;
   private Fuehler fuehler2;
@@ -26,7 +30,6 @@ public class Lebewesen{
     
     NN = new NeuralNetwork(7);
     
-    fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
     
@@ -37,10 +40,13 @@ public class Lebewesen{
     
   }
   
-  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann
-  Lebewesen(int x, int y, color c){
-    NN = new NeuralNetwork(3,5);
-    fellFarbe = c;
+  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können // Mutationen noch nicht implementiert
+  Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){
+    
+    c1 = mutieren(c1);
+    c2 = mutieren(c2);
+    
+    NN = new NeuralNetwork(7, c1, c2);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
@@ -133,31 +139,62 @@ public class Lebewesen{
       
     }
   }
-  // Fressen
-  public void fressen(){
+  
+  // Grundverbrauch
+  public void leben(){
     energie -= energieverbrauch;
-    Feld feld = map.getFeld((int)position.x,(int)position.y);
-    float neueFeldEnergie = feld.getEnergie() - fressrate;
-    
-    if (neueFeldEnergie>=0){ // Feld hat genug Energie
-      energie += fressrate;
-      feld.setEnergie((int)neueFeldEnergie);
-    } else { // Feld hat zu wenig Energie
-      energie += feld.getEnergie();
-      feld.setEnergie(0);
-    }
-    
-    if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
-      feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
-      energie = maxEnergie;
+  }
+  
+  // Fressen
+  public void fressen(float wille){
+    if(wille > 0.5){
+      energie -= energieverbrauch;
+      Feld feld = map.getFeld((int)position.x,(int)position.y);
+      float neueFeldEnergie = feld.getEnergie() - fressrate;
+      
+      if (neueFeldEnergie>=0){ // Feld hat genug Energie
+        energie += fressrate;
+        feld.setEnergie((int)neueFeldEnergie);
+      } else { // Feld hat zu wenig Energie
+        energie += feld.getEnergie();
+        feld.setEnergie(0);
+      }
+      
+      if (energie>maxEnergie){ // Lebewesen-Energie ist über dem Maximum
+        feld.setEnergie((int)(feld.getEnergie()+(energie-maxEnergie)));
+        energie = maxEnergie;
+      }
     }
   }
+  
+  // Gebaeren
+  public void gebaeren(float wille){
+    if(wille > 0.5 && energie >= geburtsenergie && (map.getJahr() % reproduktionsWartezeit == 0)){
+      energie -= geburtsenergie;
+      map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
+    }
+    
+  }
+  
   // Fuehler 1 rotieren
   public void fuehlerRotieren1(float angle){
     fuehler1.position.rotate(radians(angle));
   }
   public void fuehlerRotieren2(float angle){
     fuehler2.position.rotate(radians(angle));
+  }
+  
+  // mutiert Gewichte
+  public Connection[][] mutieren(Connection[][] cArr){
+    for(int x=0; x<cArr.length; x++){
+      for(Connection c : cArr[x]){
+        float chance = random(0,1);
+        if(chance>0.5){
+          c.setWeight(c.getWeight()+random(-0.1,0.1));
+        }
+      }
+    }
+    return cArr;
   }
   
   public void erinnern(float m){

@@ -3,12 +3,16 @@ public class Welt{
   private Feld[][] welt;
   private ArrayList<Lebewesen> bewohner;
   private int lwZahl;
-  
+  private float weltX;
+  private float weltY;
+  private float jahr;
+  private float spacing;
   private int fB;
   
   
   public Welt(int weltG, int lw){
     
+    jahr = 0;
     lwZahl = lw;
     
     weltGroesse = weltG;
@@ -43,12 +47,13 @@ public class Welt{
     
   }
   // entfernt Tote
-  public void kill(){
+  public void todUndGeburt(){
     ArrayList<Lebewesen> bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
     for(Lebewesen lw : bewohnerCopy){
       if(!lw.getStatus()){
         bewohner.remove(bewohner.indexOf(lw));
       }
+      lw.gebaeren(lw.NN.getGeburtwille());
     }
   }
   
@@ -57,6 +62,9 @@ public class Welt{
     translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
     scale(skalierungsfaktor);
     background(0,128,255);
+    weltX = (0-xOffsetGesamt-xOffset)/skalierungsfaktor;
+    weltY = (0-yOffsetGesamt-yOffset)/skalierungsfaktor;
+    spacing = 20/skalierungsfaktor;
     int bewohnerZahl = bewohner.size();
     if(bewohnerZahl < lwZahl){
       for(int i=0; i<lwZahl-bewohnerZahl; i++){
@@ -72,24 +80,43 @@ public class Welt{
     }
     for(Lebewesen lw : bewohner){
       lw.input();
-      
+      lw.leben();
       lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
-      lw.fressen();
+      lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
-      
     }
-    kill();
-    for(int x=0; x<weltGroesse; x++){
-      for(Feld f : welt[x]){
-        f.regenerieren();
-      }
-    }
+    
+    todUndGeburt();
+    
+    felderRegenerieren();
+    
+    jahr += 0.0005;
+    
     showWelt();
     showLebewesen();
+    showInterface();
+  }
+  // Lebewesen hinzufügen
+  public void addLebewesen(Lebewesen lw){
+    bewohner.add(lw);
+  }
+  
+  // Interface
+  public void showInterface(){
+    String jahre = "Jahre: " + jahr;
+    fill(50, 200);
+    rect(weltX,weltY, 200/skalierungsfaktor, 250/skalierungsfaktor);
+    
+    fill(255);
+    textSize(17/skalierungsfaktor);
+    textAlign(LEFT);
+    text(jahre, weltX + spacing, weltY + spacing);
+    
+    text("Bewohner: " + bewohner.size(), weltX + spacing*2, weltY + spacing*2);
   }
   
   // zeichnet die Welt
@@ -115,6 +142,14 @@ public class Welt{
   // zeichnet ein einziges Lebewesen (eig. unnötig, aber um die Form zu wahren sollte man diese Methode nutzen)
   public void showLebewesen(Lebewesen lw){
     lw.drawLebewesen();
+  }
+  
+  public void felderRegenerieren(){
+    for(int x=0; x<weltGroesse; x++){
+      for(Feld f : welt[x]){
+        f.regenerieren();
+      }
+    }
   }
   
   //// Getter
@@ -143,13 +178,16 @@ public class Welt{
     return welt;
   }
   
-    public Lebewesen getTier(int x,int y){
+  public Lebewesen getTier(int x,int y){
     for(Lebewesen a:bewohner){
       if(a.position.x - x > -a.durchmesser/4 && a.position.x - x < a.durchmesser/4 && a.position.y - y > -a.durchmesser/4 && a.position.y - y < -a.durchmesser/4){
         return a;
       }
     }
     return null; 
-}
+  }
   
+  public float getJahr(){
+    return jahr;
+  }
 }
