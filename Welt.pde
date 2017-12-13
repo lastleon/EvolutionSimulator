@@ -8,7 +8,7 @@ public class Welt{
   private float jahr;
   private float spacing;
   private int fB;
-  
+  private float zeitProFrame = 0.0005;
   
   public Welt(int weltG, int lw){
     
@@ -81,6 +81,7 @@ public class Welt{
     for(Lebewesen lw : bewohner){
       lw.input();
       lw.leben();
+      lw.altern();
       lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
@@ -94,7 +95,7 @@ public class Welt{
     
     felderRegenerieren();
     
-    jahr += 0.0005;
+    jahr += zeitProFrame;
     
     showWelt();
     showLebewesen();
@@ -189,5 +190,8 @@ public class Welt{
   
   public float getJahr(){
     return jahr;
+  }
+  public float getZeitProFrame(){
+    return zeitProFrame;
   }
 }

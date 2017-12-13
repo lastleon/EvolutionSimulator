@@ -6,6 +6,7 @@ public class Lebewesen{
   private PVector geschwindigkeit;
   private PVector position;
   
+  private float mutationsrate = 0.3;
   private float durchmesser = 10; // muss an Welt skaliert werden
   private float fressrate = 20;
   private float maxGeschwindigkeit = 3; //GEN
@@ -17,7 +18,9 @@ public class Lebewesen{
   private float energieverbrauch = 3;
   private boolean lebend = true;
   private float geburtsenergie = 100;
-  private float reproduktionsWartezeit = 0.1;
+  private float reproduktionsWartezeit = 0.2;
+  
+  private float alter = 0;
   
   private Fuehler fuehler1;
   private Fuehler fuehler2;
@@ -169,9 +172,10 @@ public class Lebewesen{
   
   // Gebaeren
   public void gebaeren(float wille){
-    if(wille > 0.5 && energie >= geburtsenergie && (map.getJahr() % reproduktionsWartezeit == 0)){
+    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit == 0)){
       energie -= geburtsenergie;
       map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
+      println("Ein neues Früchtchen ist entsprungen!");
     }
     
   }
@@ -190,11 +194,15 @@ public class Lebewesen{
       for(Connection c : cArr[x]){
         float chance = random(0,1);
         if(chance>0.5){
-          c.setWeight(c.getWeight()+random(-0.1,0.1));
+          c.setWeight(c.getWeight()+random(-mutationsrate,mutationsrate));
         }
       }
     }
     return cArr;
+  }
+  
+  public void altern(){
+    alter += map.getZeitProFrame();
   }
   
   public void erinnern(float m){
