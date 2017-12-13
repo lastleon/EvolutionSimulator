@@ -10,11 +10,11 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-Welt map = new Welt(100, 50);
+Welt map = new Welt(200, 50);
 
 void setup(){
   size(1000,1000);
-  stroke(1);
+  noStroke();
   skalierungsfaktor = 1;
   map.showWelt();
   map.showLebewesen(map.getLebewesen());

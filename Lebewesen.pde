@@ -6,18 +6,18 @@ public class Lebewesen{
   private PVector geschwindigkeit;
   private PVector position;
   
-  private float mutationsrate = 0.3;
+  private float mutationsrate = 1;
   private float durchmesser = 10; // muss an Welt skaliert werden
   private float fressrate = 20;
-  private float maxGeschwindigkeit = 3; //GEN
-  private float energie = 1400.0;
+  private float maxGeschwindigkeit = 1; //GEN
+  private float energie = 300.0;
   private float maxEnergie = 1400.0; 
   private color fellFarbe = fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
   private float verbrauchBewegung = 7;
   private float wasserreibung = 0.02;
   private float energieverbrauch = 3;
   private boolean lebend = true;
-  private float geburtsenergie = 100;
+  private float geburtsenergie = 200;
   private float reproduktionsWartezeit = 0.2;
   
   private float alter = 0;
@@ -46,6 +46,7 @@ public class Lebewesen{
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können // Mutationen noch nicht implementiert
   Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){
     
+    energie = geburtsenergie;
     c1 = mutieren(c1);
     c2 = mutieren(c2);
     
@@ -145,13 +146,13 @@ public class Lebewesen{
   
   // Grundverbrauch
   public void leben(){
-    energie -= energieverbrauch;
+    energie -= energieverbrauch*alter;
   }
   
   // Fressen
   public void fressen(float wille){
     if(wille > 0.5){
-      energie -= energieverbrauch;
+      energie -= energieverbrauch*alter;
       Feld feld = map.getFeld((int)position.x,(int)position.y);
       float neueFeldEnergie = feld.getEnergie() - fressrate;
       
@@ -172,7 +173,7 @@ public class Lebewesen{
   
   // Gebaeren
   public void gebaeren(float wille){
-    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit == 0)){
+    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit >= 0.0 && alter % reproduktionsWartezeit <0.0005) && alter > 0.1){
       energie -= geburtsenergie;
       map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
       println("Ein neues Früchtchen ist entsprungen!");
