@@ -32,8 +32,9 @@ public class Lebewesen{
     
     position = new PVector(x,y);
     
-    fuehler1 = new Fuehler(this, random(0,360));
-    fuehler2 = new Fuehler(this, random(0,360));
+    fuehler1 = new Fuehler(this);
+    fuehler2 = new Fuehler(this);
+    
   }
   
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann
@@ -45,6 +46,9 @@ public class Lebewesen{
     geschwindigkeit.limit(maxGeschwindigkeit);
     
     position = new PVector(x,y);
+    
+    fuehler1 = new Fuehler(this);
+    fuehler2 = new Fuehler(this);
   }
   
   public void drawLebewesen(){
@@ -72,6 +76,31 @@ public class Lebewesen{
     NN.getInputNBias().setWert(1);
     // Richtung
     NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), 0, 360, -1, 1));
+    
+    
+    //// Fuehler 1
+    // Richtung Fuehler 
+    NN.getInputNFuehlerRichtung1().setWert(map(degrees(fuehler1.position.heading()), 0, 360, -1, 1));
+    // Gegnerenergie
+    //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
+    NN.getInputNFuehlerGegnerEnergie1().setWert(map(fuehler1.getFuehlerGegnerEnergie(), 0, 1400, -1, 1));
+    // Feldenergie
+    //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
+    NN.getInputNFuehlerFeldEnergie1().setWert(map(fuehler1.getFuehlerFeldEnergie(), 0, 80, -1, 1));
+    // Feldart
+    NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, -1, 1));
+    
+    //// Fuehler 2
+    // Richtung Fuehler
+    NN.getInputNFuehlerRichtung2().setWert(map(degrees(fuehler2.position.heading()), 0, 360, -1, 1));
+    // Gegnerenergie
+    //float[] gegnerEnergie2 = fuehler2.getFuehlerGegnerEnergie();
+    NN.getInputNFuehlerGegnerEnergie2().setWert(map(fuehler2.getFuehlerGegnerEnergie(), 0, 1400, -1, 1));
+    // Feldenergie
+    //float[] feldEnergie2 = fuehler2.getFuehlerFeldEnergie();
+    NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, 80, -1, 1));
+    // Feldart
+    NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -1, 1));
   }
   
   // Bewewgung
@@ -123,6 +152,13 @@ public class Lebewesen{
       energie = maxEnergie;
     }
   }
+  // Fuehler 1 rotieren
+  public void fuehlerRotieren1(float angle){
+    fuehler1.position.rotate(radians(angle));
+  }
+  public void fuehlerRotieren2(float angle){
+    fuehler2.position.rotate(radians(angle));
+  }
   
   public void erinnern(float m){
     memory = m;
@@ -141,5 +177,11 @@ public class Lebewesen{
   }
   public float getMaxGeschwindigkeit(){
     return maxGeschwindigkeit;
+  }
+  public float getEnergie(){
+    return energie;
+  }
+  public float getMaxEnergie(){
+    return maxEnergie;
   }
 }

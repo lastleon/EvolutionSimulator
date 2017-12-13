@@ -72,10 +72,14 @@ public class Welt{
     }
     for(Lebewesen lw : bewohner){
       lw.input();
+      
       lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
       lw.fressen();
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
+      
+      lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
+      lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
       
     }
     kill();

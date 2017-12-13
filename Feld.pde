@@ -57,6 +57,10 @@ class Feld{
     return energiewert;
   }
   
+  public float getMaxEnergie(){
+    return maxEnergiewert;
+  }
+  
   public void setEnergie(int x){
     energiewert = x;
   }

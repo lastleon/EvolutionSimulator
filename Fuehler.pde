@@ -1,41 +1,67 @@
 class Fuehler{
   
-  private PVector position = new PVector(10,0);
+  private PVector position;
   
-  private int abstand = 10;
-  private Lebewesen tier;
-  private Feld momentanFeld;
+  private int abstand = 15;
+  private Lebewesen lw;
   
-  Fuehler(Lebewesen t, float angle){
-    tier = t;
-    position.rotate(radians(angle));
-    position.setMag(abstand);
-    //position.set(t.position.x + abstand*cos(random(0,2*3.1415926535)),t.position.y + abstand*sin(random(0,2*3.1415926536)));
+  Fuehler(Lebewesen l){
+    position = new PVector(abstand,0);
+    position.limit(abstand);
+    lw = l;
   }
   
   //updated und malt den Fühler
   public void drawFuehler(){
     
-    position.x = tier.position.x + abstand*cos(position.heading());
-    position.y = tier.position.y + abstand*sin(position.heading());
-    momentanFeld = map.getFeld((int)position.x,(int)position.y);
-    line(position.x,position.y,tier.position.x,tier.position.y);
-    ellipse(position.x,position.y,tier.durchmesser/2,tier.durchmesser/2);
-  }
-  
-  //getter
-  //gibt die Energie vom feld des Fühlers
-  public int fuehlerEnergie(){
-    return (int)momentanFeld.getEnergie();
-  }
-  
-  //gibt,wenn Gegner vorhanden, dessen Energie aus
-  public Integer fuehlerGegnerEnergie(){
-    Lebewesen a = map.getTier((int)position.x,(int)position.y);
-    if(a != null){
-      return (Integer)((int)a.energie);
+    // Fühlerposition wird erstellt
+    position.x = lw.position.x + abstand*cos(position.heading());
+    position.y = lw.position.y + abstand*sin(position.heading());
+    
+    // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
+    if (position.x > fensterGroesse){ // wenn zu weit rechts        
+      position.set(position.x-fensterGroesse, position.y);
     }
-    else return null;
+    if (position.x < 0){ // wenn zu weit links       
+      position.set(fensterGroesse+position.x, position.y); // + position.x, weil es immer ein negativer Wert ist
+    }
+    if (position.y > fensterGroesse){ // wenn zu weit unten
+      position.set(position.x, position.y-fensterGroesse);
+    }
+    if (position.y < 0){ // wenn zu weit oben
+      position.set(position.x, fensterGroesse+position.y); // + position.y, weil es immer ein negativer Wert ist
+    }
+    
+    // Falls Fuehler auf anderer Seite der Map sind, werden die Linien nicht mehr gemalt
+    if(position.mag() - lw.position.mag() == abstand){
+      line(position.x, position.y, lw.position.x, lw.position.y);
+    }
+    
+    ellipse(position.x, position.y, lw.durchmesser/2, lw.durchmesser/2);
   }
-
+  
+  ////getter
+  //gibt die Energie vom feld des Fühlers
+  public float getFuehlerRichtung(){
+    return degrees(position.heading());
+  }
+  
+  public float getFuehlerFeldEnergie(){
+    Feld feld = map.getFeld((int)position.x, (int)position.y);
+    return feld.getEnergie();
+  }
+  
+  //gibt,wenn Gegner vorhanden, dessen Energie aus // muss effizienter gemacht werden
+  public float getFuehlerGegnerEnergie(){
+    Lebewesen lw = map.getTier((int)position.x,(int)position.y);
+    if(lw != null){
+      return lw.getEnergie();
+    } else {
+      return 0;
+    }
+  }
+  
+  public float getFuehlerFeldArt(){
+    return map.getFeld((int)position.x, (int)position.y).isLandInt();
+  }
 }
