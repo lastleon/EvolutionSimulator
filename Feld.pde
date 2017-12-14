@@ -16,9 +16,9 @@ class Feld{
     feldBreite = fB;
     
     if(this.isLand()){
-      regenerationsrate = 1;
-      energiewert = 80;
-      maxEnergiewert = 80;
+      regenerationsrate = 0.4;
+      energiewert = 0;
+      maxEnergiewert = 120;
     } else {
       regenerationsrate = 0;
       energiewert = 0;

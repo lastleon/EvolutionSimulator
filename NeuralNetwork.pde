@@ -5,7 +5,6 @@ public class NeuralNetwork{
   private WorkingNeuron[] hiddenSchicht1;
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
-  
   // wird für aller erste Generation verwendet, gewichte sind random zwischen 0.01 und 
   NeuralNetwork(int iS, int hS1){ // inputSchicht, hiddenSchicht1
     // Input Neuronen werden erstellt
@@ -18,7 +17,7 @@ public class NeuralNetwork{
     connections1 = new Connection[hS1][iS];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iS; i2++){
-        connections1[i][i2] = new Connection(inputSchicht[i2], random(0,1));
+        connections1[i][i2] = new Connection(inputSchicht[i2], random(0,1)); // muss noch randomGaussian werden
       }
     }
     
@@ -64,8 +63,8 @@ public class NeuralNetwork{
     connections1 = new Connection[hS1][iSLaenge];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iSLaenge; i2++){
-        w1 = randomGaussian();
-        connections1[i][i2] = new Connection(inputSchicht[i2],w1);
+        w1 = random(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge)); // TEST, vorher randomGaussian()
+        connections1[i][i2] = new Connection(inputSchicht[i2], w1);
       }
     }
     
@@ -85,7 +84,7 @@ public class NeuralNetwork{
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian();
+        w2 = random(-1/sqrt(hS1), 1/sqrt(hS1)); // TEST, vorher randomGaussian()
         connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
       }
     }
@@ -109,7 +108,13 @@ public class NeuralNetwork{
       inputSchicht[i] = new InputNeuron();
     }
     
-    connections1 = c1;
+    // connections mit Gewichten der Eltern werden erstellt
+    connections1 = new Connection[hS1][iSLaenge];
+    for(int i=0; i<hS1; i++){
+      for(int i2=0; i2<iSLaenge; i2++){
+        connections1[i][i2] = new Connection(inputSchicht[i2], c1[i][i2].getWeight());
+      }
+    }
     
     /*
     float w1;
@@ -135,23 +140,18 @@ public class NeuralNetwork{
     int outputNeuronen = 10; // Grund in NN_Planung.txt ersichtlich
     
     
-    connections2 = c2;
-    /*
-    float w2;
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian();
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
+        connections2[i][i2] = new Connection(hiddenSchicht1[i2], c2[i][i2].getWeight());
       }
     }
-    */
     
     // Output Neuronen werden erstellt
     outputSchicht = new WorkingNeuron[outputNeuronen];
     for(int i=0; i<outputNeuronen; i++){
       outputSchicht[i] = new WorkingNeuron(connections2[i]);
-    }    
+    }
   }
   
   

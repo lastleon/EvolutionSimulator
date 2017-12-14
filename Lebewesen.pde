@@ -1,15 +1,15 @@
 
 public class Lebewesen{
   
-  public final static int maxRotationswinkel = 10;
+  public final static int maxRotationswinkel = 10; /////////////////////////////// Version mit veraenderter Mutation
   
   private PVector geschwindigkeit;
   private PVector position;
   
-  private float mutationsrate = 1;
+  private float mutationsrate = 0.5;
   private float durchmesser = 10; // muss an Welt skaliert werden
   private float fressrate = 20;
-  private float maxGeschwindigkeit = 1; //GEN
+  private float maxGeschwindigkeit = 3; //GEN
   private float energie = 300.0;
   private float maxEnergie = 1400.0; 
   private color fellFarbe = fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
@@ -18,9 +18,9 @@ public class Lebewesen{
   private float energieverbrauch = 3;
   private boolean lebend = true;
   private float geburtsenergie = 200;
-  private float reproduktionsWartezeit = 0.2;
+  private float reproduktionsWartezeit = 0.3;
   
-  private float alter = 0;
+  private double alter = 0;
   
   private Fuehler fuehler1;
   private Fuehler fuehler2;
@@ -31,7 +31,7 @@ public class Lebewesen{
   // sollte bei 1. Generation verwendet werden
   Lebewesen(int x, int y){
     
-    NN = new NeuralNetwork(7);
+    NN = new NeuralNetwork(14);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
@@ -50,7 +50,7 @@ public class Lebewesen{
     c1 = mutieren(c1);
     c2 = mutieren(c2);
     
-    NN = new NeuralNetwork(7, c1, c2);
+    NN = new NeuralNetwork(14, c1, c2);
     
     geschwindigkeit = new PVector(maxGeschwindigkeit,maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
@@ -146,13 +146,13 @@ public class Lebewesen{
   
   // Grundverbrauch
   public void leben(){
-    energie -= energieverbrauch*alter;
+    energie -= energieverbrauch*(alter/2);
   }
   
   // Fressen
   public void fressen(float wille){
     if(wille > 0.5){
-      energie -= energieverbrauch*alter;
+      energie -= energieverbrauch*(alter/2);
       Feld feld = map.getFeld((int)position.x,(int)position.y);
       float neueFeldEnergie = feld.getEnergie() - fressrate;
       
@@ -194,8 +194,9 @@ public class Lebewesen{
     for(int x=0; x<cArr.length; x++){
       for(Connection c : cArr[x]){
         float chance = random(0,1);
-        if(chance>0.5){
-          c.setWeight(c.getWeight()+random(-mutationsrate,mutationsrate));
+        if(chance>0.3){
+          float multiplizierer = random(-mutationsrate,mutationsrate);
+          c.setWeight(c.getWeight()+c.getWeight() * multiplizierer);
         }
       }
     }
