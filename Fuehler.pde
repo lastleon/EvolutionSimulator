@@ -14,9 +14,12 @@ class Fuehler{
   //updated und malt den Fühler
   public void drawFuehler(){
     
+    //println(degrees(position.heading()));
+    
     // Fühlerposition wird erstellt
     position.x = lw.position.x + abstand*cos(position.heading());
     position.y = lw.position.y + abstand*sin(position.heading());
+    
     
     // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
     if (position.x > fensterGroesse){ // wenn zu weit rechts        
@@ -33,11 +36,15 @@ class Fuehler{
     }
     
     // Falls Fuehler auf anderer Seite der Map sind, werden die Linien nicht mehr gemalt
-    if(position.mag() - lw.position.mag() == abstand){
+    if(!(position.dist(lw.getPosition()) > abstand)){
       line(position.x, position.y, lw.position.x, lw.position.y);
     }
     
     ellipse(position.x, position.y, lw.durchmesser/2, lw.durchmesser/2);
+  }
+  
+  public void fuehlerRotieren(float angle){
+    position.rotate(radians(angle));
   }
   
   ////getter
@@ -64,4 +71,10 @@ class Fuehler{
   public float getFuehlerFeldArt(){
     return map.getFeld((int)position.x, (int)position.y).isLandInt();
   }
+  
+  public PVector getPosition(){
+    return position;
+  }
+  
+  
 }

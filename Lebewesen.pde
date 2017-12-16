@@ -1,7 +1,8 @@
 
 public class Lebewesen{
   
-  public final static int maxRotationswinkel = 10; /////////////////////////////// Version mit veraenderter Mutation
+  public final static int maxRotationswinkelBewegung = 10; /////////////////////////////// Version mit veraenderter Mutation
+  public final static int maxRotationswinkelFuehler = 180;
   
   private PVector geschwindigkeit;
   private PVector position;
@@ -183,10 +184,12 @@ public class Lebewesen{
   
   // Fuehler 1 rotieren
   public void fuehlerRotieren1(float angle){
-    fuehler1.position.rotate(radians(angle));
+    fuehler1.fuehlerRotieren(angle);
   }
+  
+  // Fuehler 2 rotieren
   public void fuehlerRotieren2(float angle){
-    fuehler2.position.rotate(radians(angle));
+    fuehler2.fuehlerRotieren(angle);
   }
   
   // mutiert Gewichte
@@ -230,5 +233,8 @@ public class Lebewesen{
   }
   public float getMaxEnergie(){
     return maxEnergie;
+  }
+  public PVector getPosition(){
+    return position;
   }
 }

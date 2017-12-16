@@ -78,6 +78,8 @@ public class Welt{
         bewohner.add(new Lebewesen(posX,posY));
       }
     }
+    
+    
     for(Lebewesen lw : bewohner){
       lw.input();
       lw.leben();
@@ -88,6 +90,7 @@ public class Welt{
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
+      //println(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
     }
     
@@ -129,20 +132,29 @@ public class Welt{
     }
   }
   public void showLebewesen(){
+    stroke(1);
+    strokeWeight(0.1);
     for(Lebewesen lw : bewohner){
       lw.drawLebewesen();
     }
+    noStroke();
   }
   // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
   public void showLebewesen(Lebewesen[] lwArray){
+    stroke(1);
+    strokeWeight(0.1);
     for(Lebewesen lw : lwArray){
       lw.drawLebewesen();
     }
+    noStroke();
   }
   
   // zeichnet ein einziges Lebewesen (eig. unnötig, aber um die Form zu wahren sollte man diese Methode nutzen)
   public void showLebewesen(Lebewesen lw){
+    stroke(1);
+    strokeWeight(0.1);
     lw.drawLebewesen();
+    noStroke();
   }
   
   public void felderRegenerieren(){

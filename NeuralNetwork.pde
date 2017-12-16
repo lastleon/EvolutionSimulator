@@ -230,7 +230,7 @@ public class NeuralNetwork{
     return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
   }
   public float getRotation(){
-    return outputSchicht[1].getWert() * Lebewesen.maxRotationswinkel;
+    return outputSchicht[1].getWert() * Lebewesen.maxRotationswinkelBewegung;
   }
   public float getMemory(){
     return outputSchicht[2].getWert();
@@ -247,10 +247,10 @@ public class NeuralNetwork{
   
   // Fuehler
   public float getRotationFuehler1(){
-    return outputSchicht[6].getWert() * 180;
+    return outputSchicht[6].getWert() * Lebewesen.maxRotationswinkelFuehler;
   }
   public float getRotationFuehler2(){
-    return outputSchicht[7].getWert() * 180;
+    return outputSchicht[7].getWert() * Lebewesen.maxRotationswinkelFuehler;
   }
   
   
