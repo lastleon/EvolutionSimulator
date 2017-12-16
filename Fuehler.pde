@@ -1,25 +1,24 @@
 class Fuehler{
   
-  private PVector position;
-  
   private int abstand = 15;
+  
+  private PVector position;
+  private PVector ausrichtung;
+  
   private Lebewesen lw;
   
   Fuehler(Lebewesen l){
-    position = new PVector(abstand,0);
-    position.limit(abstand);
+    ausrichtung = new PVector(abstand,0);
+    position = new PVector(0,0);
     lw = l;
   }
   
   //updated und malt den Fühler
   public void drawFuehler(){
     
-    //println(degrees(position.heading()));
-    
     // Fühlerposition wird erstellt
-    position.x = lw.position.x + abstand*cos(position.heading());
-    position.y = lw.position.y + abstand*sin(position.heading());
-    
+    position.set(lw.position.x, lw.position.y); //                               lw.position.copy() wurder manchmal null, keine Ahnung wieso
+    position.add(ausrichtung);
     
     // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
     if (position.x > fensterGroesse){ // wenn zu weit rechts        
@@ -44,36 +43,33 @@ class Fuehler{
   }
   
   public void fuehlerRotieren(float angle){
-    position.rotate(radians(angle));
+    ausrichtung.rotate(radians(angle));
   }
   
   ////getter
-  //gibt die Energie vom feld des Fühlers
-  public float getFuehlerRichtung(){
-    return degrees(position.heading());
-  }
   
+  //gibt die Energie vom feld des Fühlers
   public float getFuehlerFeldEnergie(){
     Feld feld = map.getFeld((int)position.x, (int)position.y);
     return feld.getEnergie();
   }
   
   //gibt,wenn Gegner vorhanden, dessen Energie aus // muss effizienter gemacht werden
-  public float getFuehlerGegnerEnergie(){
+  public float getFuehlerGegnerEnergie(){ /////////////   aus irgend einem Grund kann position null werden
     Lebewesen lw = map.getTier((int)position.x,(int)position.y);
     if(lw != null){
       return lw.getEnergie();
     } else {
       return 0;
-    }
+}
   }
   
   public float getFuehlerFeldArt(){
     return map.getFeld((int)position.x, (int)position.y).isLandInt();
   }
   
-  public PVector getPosition(){
-    return position;
+  public float getRichtung(){
+    return degrees(ausrichtung.heading());
   }
   
   

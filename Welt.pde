@@ -18,7 +18,7 @@ public class Welt{
     weltGroesse = weltG;
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
-    fB = (int)fensterGroesse/weltGroesse;
+    fB = (int)(fensterGroesse/weltGroesse);
     
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -36,16 +36,17 @@ public class Welt{
     for(int i=0; i<lw; i++){
       int posX;
       int posY;
-      
       do {
+        //println("\n\ngeneriere Lebewesen");
         posX = (int)random(0,fensterGroesse);
         posY = (int)random(0,fensterGroesse);
       } while (!this.getFeld(posX,posY).isLand());
       
       bewohner.add(new Lebewesen(posX,posY));
+      
     }
-    
   }
+  
   // entfernt Tote
   public void todUndGeburt(){
     ArrayList<Lebewesen> bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
@@ -71,6 +72,7 @@ public class Welt{
         int posX;
         int posY;
         do {
+          //println("\n\nfehlende Lebewesen werden hizugefügt");
           posX = (int)random(0,fensterGroesse);
           posY = (int)random(0,fensterGroesse);
         } while (!this.getFeld(posX,posY).isLand());
@@ -84,14 +86,13 @@ public class Welt{
       lw.input();
       lw.leben();
       lw.altern();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw),degrees(lw.NN.getRotation()));
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw), degrees(lw.NN.getRotation()));
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-      
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
-      //println(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
+      lw.angriff(lw.NN.getAngriffswille());
     }
     
     todUndGeburt();
@@ -99,7 +100,6 @@ public class Welt{
     felderRegenerieren();
     
     jahr += zeitProFrame;
-    
     showWelt();
     showLebewesen();
     showInterface();
@@ -175,15 +175,16 @@ public class Welt{
   }
   
   public Feld getFeld(int x, int y){ // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
-    float xFeld = (x - (x%fB)) / fB;
-    float yFeld = (y - (y%fB)) / fB;
-    if (xFeld == weltGroesse){
+    float xFeld = (x - (x % fB)) / fB;
+    float yFeld = (y - (y % fB)) / fB;
+    if (xFeld >= weltGroesse){
       xFeld = 0;
     }
-    if (yFeld == weltGroesse){
+    if (yFeld >= weltGroesse){
       yFeld = 0;
     }
-    return welt[(int)xFeld][(int)yFeld];  // so müssen nicht jedes mal alle Felder durchlaufen werden && bin mir nicht sicher, ob es überhaupt funktioniert hätte, weil ja nur die Linke obere Ecke (x&y) überprüft wird
+    //println("x: " + x + " xFeld: " + xFeld + "         y: " + y + " yFeld: " + yFeld);
+    return welt[(int)xFeld][(int)yFeld];
    
   }
   
@@ -192,9 +193,9 @@ public class Welt{
   }
   
   public Lebewesen getTier(int x,int y){
-    for(Lebewesen a:bewohner){
-      if(a.position.x - x > -a.durchmesser/4 && a.position.x - x < a.durchmesser/4 && a.position.y - y > -a.durchmesser/4 && a.position.y - y < -a.durchmesser/4){
-        return a;
+    for(Lebewesen lw : bewohner){
+      if(sqrt(sq(lw.position.x- x) + sq(lw.position.y- y)) < lw.durchmesser/2){
+        return lw;
       }
     }
     return null; 
