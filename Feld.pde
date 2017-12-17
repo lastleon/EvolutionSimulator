@@ -7,6 +7,8 @@ class Feld{
   private float maxEnergiewert;
   private int feldBreite;
   
+  final public static float maxEnergiewertAllgemein = 120;
+  
   private int meeresspiegel = 45;
 
   Feld(int x , int y, float h, int fB){
@@ -18,7 +20,7 @@ class Feld{
     if(this.isLand()){
       regenerationsrate = 0.4;
       energiewert = 0;
-      maxEnergiewert = 120;
+      maxEnergiewert = maxEnergiewertAllgemein;
     } else {
       regenerationsrate = 0;
       energiewert = 0;
@@ -52,6 +54,10 @@ class Feld{
     rect(posX, posY, feldBreite, feldBreite);
   }
   
+  public void setEnergie(int x){
+    energiewert = x;
+  }
+  
   // getter(bisher)
   public float getEnergie(){
     return energiewert;
@@ -60,8 +66,5 @@ class Feld{
   public float getMaxEnergie(){
     return maxEnergiewert;
   }
-  
-  public void setEnergie(int x){
-    energiewert = x;
-  }
+
 }

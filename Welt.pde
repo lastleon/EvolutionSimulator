@@ -5,10 +5,11 @@ public class Welt{
   private int lwZahl;
   private float weltX;
   private float weltY;
-  private float jahr;
+  private double jahr;
   private float spacing;
   private int fB;
-  private float zeitProFrame = 0.0005;
+  private double zeitProFrame = 0.0005;
+  private int multiplikator = 10000;
   
   public Welt(int weltG, int lw){
     
@@ -100,6 +101,9 @@ public class Welt{
     felderRegenerieren();
     
     jahr += zeitProFrame;
+    float neuesJahr = (float)(jahr * multiplikator);
+    jahr = (double)floor(neuesJahr) / multiplikator;
+    
     showWelt();
     showLebewesen();
     showInterface();
@@ -201,10 +205,13 @@ public class Welt{
     return null; 
   }
   
-  public float getJahr(){
+  public double getJahr(){
     return jahr;
   }
-  public float getZeitProFrame(){
+  public double getZeitProFrame(){
     return zeitProFrame;
+  }
+  public int getZeitMultiplikator(){
+    return multiplikator;
   }
 }

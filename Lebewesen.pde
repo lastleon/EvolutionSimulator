@@ -15,11 +15,11 @@ public class Lebewesen{
   private float maxEnergie = 1400.0; 
   private color fellFarbe = color((int)random(0,256), (int)random(0,256), (int)random(0,256));
   private float verbrauchBewegung = 7;
-  private float wasserreibung = 0.02;
+  private float wasserreibung = 0.1;
   private float energieverbrauch = 3;
   private boolean lebend = true;
   private float geburtsenergie = 200;
-  private float reproduktionsWartezeit = 0.4;
+  private float reproduktionsWartezeit = 0.2;
   private float angriffswert = 20;
   
   private double alter = 0;
@@ -45,7 +45,7 @@ public class Lebewesen{
     
   }
   
-  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können // Mutationen noch nicht implementiert
+  // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
   Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2){
     
     energie = geburtsenergie;
@@ -73,47 +73,47 @@ public class Lebewesen{
   // NeuralNetwork input
   public void input(){
     // Geschwindigkeit
-    NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, 0, 1));
+    NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -1, 1));
     // Fellfarbe
-    NN.getInputNFellRot().setWert(map(red(fellFarbe), 0, 255, 0, 1));
-    NN.getInputNFellGruen().setWert(map(green(fellFarbe), 0, 255, 0, 1));
-    NN.getInputNFellBlau().setWert(map(blue(fellFarbe), 0, 255, 0, 1));
+    NN.getInputNFellRot().setWert(map(red(fellFarbe), 0, 255, -1, 1));
+    NN.getInputNFellGruen().setWert(map(green(fellFarbe), 0, 255, -1, 1));
+    NN.getInputNFellBlau().setWert(map(blue(fellFarbe), 0, 255, -1, 1));
     // eigene Energie
-    NN.getInputNEnergie().setWert(map(energie,0,maxEnergie,0,1));
+    NN.getInputNEnergie().setWert(map(energie, 0, maxEnergie, -1, 1));
     // Feldart
     //println("\n\ngetInputNFeldArt");
-    NN.getInputNFeldart().setWert(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, 0, 1));
+    NN.getInputNFeldart().setWert(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, -1, 1));
     // Memory
     NN.getInputNMemory().setWert(map(memory, 0, 1, -1, 1));
     // Bias // immer 1
     NN.getInputNBias().setWert(1);
     // Richtung
-    NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), 0, 360, 0, 1));
+    NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), -180, 180, -1, 1));
     
     
     //// Fuehler 1
     // Richtung Fuehler 
-    NN.getInputNFuehlerRichtung1().setWert(map(fuehler1.getRichtung(), 0, 360, 0, 1));//                                                                  Hier könnte es Probleme mit map geben
+    NN.getInputNFuehlerRichtung1().setWert(map(fuehler1.getRichtung(), -180, 180, -1, 1));//                                                                  Hier könnte es Probleme mit map geben
     // Gegnerenergie
     //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
-    NN.getInputNFuehlerGegnerEnergie1().setWert(map(fuehler1.getFuehlerGegnerEnergie(), 0, 1400, 0, 1));
+    NN.getInputNFuehlerGegnerEnergie1().setWert(map(fuehler1.getFuehlerGegnerEnergie(), 0, maxEnergie, -1, 1));// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
     // Feldenergie
     //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
-    NN.getInputNFuehlerFeldEnergie1().setWert(map(fuehler1.getFuehlerFeldEnergie(), 0, 80, 0, 1));
+    NN.getInputNFuehlerFeldEnergie1().setWert(map(fuehler1.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -1, 1));
     // Feldart
-    NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, 0, 1));
+    NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, -1, 1));
     
     //// Fuehler 2
     // Richtung Fuehler
-    NN.getInputNFuehlerRichtung2().setWert(map(fuehler2.getRichtung(), 0, 360, 0, 1)); //                                                                  Hier könnte es Probleme mit map geben
+    NN.getInputNFuehlerRichtung2().setWert(map(fuehler2.getRichtung(), -180, 180, -1, 1)); //                                                                  Hier könnte es Probleme mit map geben
     // Gegnerenergie
     //float[] gegnerEnergie2 = fuehler2.getFuehlerGegnerEnergie();
-    NN.getInputNFuehlerGegnerEnergie2().setWert(map(fuehler2.getFuehlerGegnerEnergie(), 0, 1400, 0, 1));
+    NN.getInputNFuehlerGegnerEnergie2().setWert(map(fuehler2.getFuehlerGegnerEnergie(), 0, maxEnergie, -1, 1)); // maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
     // Feldenergie
     //float[] feldEnergie2 = fuehler2.getFuehlerFeldEnergie();
-    NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, 80, 0, 1));
+    NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -1, 1));
     // Feldart
-    NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, 0, 1));
+    NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -1, 1));
   }
   
   // Bewewgung
@@ -151,6 +151,7 @@ public class Lebewesen{
     if(wille > 0.5){
       addEnergie(-energieverbrauch);
       
+      // Opfer nur DIREKT vor dem Lebewesen (d.h. in Geschwindigkeitsrichtung) kann angegriffen werden
       PVector opferPosition = new PVector(cos(geschwindigkeit.heading())*durchmesser+position.x, position.y-sin(geschwindigkeit.heading())*durchmesser);
       
       Lebewesen opfer = map.getTier((int)(opferPosition.x),(int)(opferPosition.y));
@@ -200,7 +201,7 @@ public class Lebewesen{
   
   // Gebaeren
   public void gebaeren(float wille){
-    if(wille > 0.5 && energie >= geburtsenergie && (alter % reproduktionsWartezeit >= 0.0 && alter % reproduktionsWartezeit <0.0005) && alter > 0.1){
+    if(wille > 0.5 && energie >= geburtsenergie && ((float)alter % reproduktionsWartezeit == 0)){ // Bedingung ist so seltsam, weil das Alter ungenau ist
       energie -= geburtsenergie;
       map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2()));
       println("Ein neues Früchtchen ist entsprungen!");
@@ -234,6 +235,8 @@ public class Lebewesen{
   
   public void altern(){
     alter += map.getZeitProFrame();
+    float neuesAlter = (float)(alter * map.getZeitMultiplikator());
+    alter = (double)floor(neuesAlter) / (double)map.getZeitMultiplikator();
   }
   
   public void erinnern(float m){
