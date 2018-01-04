@@ -13,7 +13,7 @@ public class WorkingNeuron extends Neuron{
     for(Connection c : inputC){
       wert += c.getWert();
     }
-    wert = AktivierungsFunktion.Sigmoid(wert); 
+    wert = AktivierungsFunktion.sigmoid(wert); 
     return wert;
   }
   // setter
