@@ -27,7 +27,7 @@ public class Welt{
     for (int y=0; y<weltGroesse; y++){
       float xNoise = 0.0;
       for(int x=0; x<weltGroesse; x++){
-        welt[x][y] = new Feld(x*fB, y*fB, noise(xNoise, yNoise)*100, fB);
+        welt[x][y] = new Feld(x*fB, y*fB, noise(xNoise, yNoise)*100, fB, x, y);
         xNoise += 0.038;
       }
       yNoise += 0.038;
@@ -87,10 +87,10 @@ public class Welt{
       lw.input();
       lw.leben();
       lw.altern();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw), degrees(lw.NN.getRotation()));
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw), lw.NN.getRotation());
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
-      lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
+      //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
       lw.angriff(lw.NN.getAngriffswille());
@@ -98,7 +98,7 @@ public class Welt{
     
     todUndGeburt();
     
-    felderRegenerieren();
+    felderBewachsen();
     
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
@@ -137,7 +137,7 @@ public class Welt{
   }
   public void showLebewesen(){
     stroke(1);
-    strokeWeight(0.1);
+    strokeWeight(0.2);
     for(Lebewesen lw : bewohner){
       lw.drawLebewesen();
     }
@@ -146,7 +146,7 @@ public class Welt{
   // zeichnet ein Array aus Lebewesen (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
   public void showLebewesen(Lebewesen[] lwArray){
     stroke(1);
-    strokeWeight(0.1);
+    strokeWeight(0.2);
     for(Lebewesen lw : lwArray){
       lw.drawLebewesen();
     }
@@ -156,15 +156,15 @@ public class Welt{
   // zeichnet ein einziges Lebewesen (eig. unnötig, aber um die Form zu wahren sollte man diese Methode nutzen)
   public void showLebewesen(Lebewesen lw){
     stroke(1);
-    strokeWeight(0.1);
+    strokeWeight(0.2);
     lw.drawLebewesen();
     noStroke();
   }
   
-  public void felderRegenerieren(){
+  public void felderBewachsen(){
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){
-        f.regenerieren();
+        f.wachsen();
       }
     }
   }
@@ -192,8 +192,15 @@ public class Welt{
    
   }
   
-  public Feld[][] getWelt(){
-    return welt;
+  public Feld getFeldInArray(int x, int y){
+    try{
+      if(x != -1 && x != weltGroesse && y != -1 && y != weltGroesse){ // um die ArrayIndexOutOfBoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist trotzdem zur sicherheit da
+        return welt[x][y];
+      } else return null;
+    } catch(Exception e){
+      e.printStackTrace();
+      return null;
+    }
   }
   
   public Lebewesen getTier(int x,int y){
