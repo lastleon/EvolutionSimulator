@@ -32,7 +32,7 @@ class Feld {
     }
   }
 
-  public void wachsen() { // Das ist wahrscheinlich ein Performance-fressendes Monster, sollte man bei Gelegenheit optimieren
+  public void wachsen() { // Das ist wahrscheinlich ein Performance-fressendes Monster, sollte man bei Gelegenheit optimieren // btw das ist sehr hässlich geschrieben
     /*
     energiewert += regenerationsrate;
     if (energiewert > maxEnergiewert){

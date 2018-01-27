@@ -55,7 +55,39 @@ public class Welt{
       if(!lw.getStatus()){
         bewohner.remove(bewohner.indexOf(lw));
       }
-      lw.gebaeren(lw.NN.getGeburtwille());
+    }
+    
+    bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
+    
+    for(Lebewesen lw1 : bewohnerCopy){
+      for(Lebewesen lw2 : bewohnerCopy){
+        if(!lw1.equals(lw2) && lw1.collision(lw2)){
+          this.gebaeren(lw1, lw2);
+        }
+      }
+    }
+  }
+  
+  public float entfernungLebewesen(Lebewesen lw1, Lebewesen lw2){
+    //return sqrt(abs(lw1.getPosition().x - lw2.getPosition().x) + abs(lw1.getPosition().y - lw2.getPosition().y));
+    return lw1.getPosition().dist(lw2.getPosition());
+  }
+  
+  public void gebaeren(Lebewesen lw1, Lebewesen lw2){
+    /*                              Beide LW muessen zustimmen                                                                Beide LW muessen genug Energie haben                                Beide LW muessen geburtsbereit sein*/
+    if((lw1.NN.getGeburtwille() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille() > Lebewesen.reproduktionswille) && (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) && (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())){
+      println("geboren");
+      // benötigte Geburtsenergie wird abgezogen
+      lw1.addEnergie(-Lebewesen.geburtsenergie);
+      lw2.addEnergie(-Lebewesen.geburtsenergie);
+      
+      // Dummy-Vectoren
+      PVector posLw1 = new PVector(lw1.getPosition().x, lw1.getPosition().y);
+      PVector posLw2 = new PVector(lw2.getPosition().x, lw2.getPosition().y);
+      
+      // Neues Lebewesen mit gemischten Connections entsteht
+      this.addLebewesen(new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), lw1.NN.getConnections1(), lw1.NN.getConnections2(), lw2.NN.getConnections1(), lw2.NN.getConnections2(), lw1.getFellfarbe(), lw2.getFellfarbe()));
+      //println("Ein neues Früchtchen ist entsprungen!");
     }
   }
   
@@ -93,7 +125,7 @@ public class Welt{
       //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
-      lw.angriff(lw.NN.getAngriffswille());
+      lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
     }
     
     todUndGeburt();
@@ -103,6 +135,13 @@ public class Welt{
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
+    if(jahr%1 == 0){
+      double aeltestesLw = 0;
+      for(Lebewesen lw : bewohner){
+        if(lw.getAlter() > aeltestesLw) aeltestesLw = lw.getAlter();
+      }
+      println("Momentan ältestes Lebewsen: " + aeltestesLw);
+    }
     
     showWelt();
     showLebewesen();

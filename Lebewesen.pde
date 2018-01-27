@@ -19,9 +19,13 @@ public class Lebewesen{
   private float wasserreibung = 0.1;
   private float energieverbrauch = 3;
   private boolean lebend = true;
-  private float geburtsenergie = 200;
-  private float reproduktionsWartezeit = 0.25;
+  public final static float geburtsenergie = 200;
+  private float reproduktionswartezeit = 0.25;
   private float angriffswert = 20;
+  public final static float reproduktionswille = 0.4;
+  private boolean geburtsbereit = false;
+  private float letzteGeburt = 0;
+  private float reproduktionsschwellwert = 0.5;
   
   private double alter = 0;
   
@@ -49,10 +53,20 @@ public class Lebewesen{
   }
   
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  Lebewesen(int x, int y, Connection[][] c1, Connection[][] c2, color fellFarbeEltern){
+  Lebewesen(int x, int y, Connection[][] c11, Connection[][] c12, Connection[][] c21, Connection[][] c22, color fellfarbe1, color fellfarbe2){
     
-    fellFarbe = fellfarbeMutieren(fellFarbeEltern);
     energie = geburtsenergie;
+    
+    // fellfarben wird linear interpoliert
+    fellFarbe = lerpColor(fellfarbe1, fellfarbe2, 0.75);
+    
+    // Connections
+    Connection[][] c1;
+    Connection[][] c2;
+    
+    c1 = this.mixConnections(c11, c21);
+    c2 = this.mixConnections(c12, c22);
+    
     c1 = mutieren(c1);
     c2 = mutieren(c2);
     
@@ -176,9 +190,10 @@ public class Lebewesen{
     }
   }
   
+  
   // Grundverbrauch
   public void leben(){
-    energie -= energieverbrauch*(alter/2);
+    energie -= energieverbrauch*(alter/10);
   }
   
   // Fressen
@@ -205,14 +220,24 @@ public class Lebewesen{
   }
   
   // Gebaeren
-  public void gebaeren(float wille){
-    if(wille > 0.5 && energie >= geburtsenergie && ((float)alter % reproduktionsWartezeit == 0)){ // Bedingung ist so seltsam, weil das Alter ungenau ist
-      energie -= geburtsenergie;
-      map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2(), fellFarbe));
-      println("Ein neues Früchtchen ist entsprungen!");
+  // wird in Welt Klasse verlegt
+    
+  /*
+  if(wille > 0.5 && energie >= geburtsenergie && ((float)alter % reproduktionsWartezeit == 0)){ // Bedingung ist so seltsam, weil das Alter ungenau ist
+    energie -= geburtsenergie;
+    map.addLebewesen(new Lebewesen((int)position.x, (int)position.y, NN.getConnections1(), NN.getConnections2(), fellFarbe));
+    println("Ein neues Früchtchen ist entsprungen!");
+  }
+  */ // Das wird viel :((
+  
+  public boolean collision(Lebewesen lw){
+    float abstand = map.entfernungLebewesen(this, lw);
+    if(abstand <= durchmesser){
+      return true;
+    } else {
+      return false;
     }
   }
-  
   public color fellfarbeMutieren(color fellfarbe){
     
     float r = red(fellfarbe) + red(fellfarbe) * random(-0.3,0.3);
@@ -251,8 +276,7 @@ public class Lebewesen{
   public Connection[][] mutieren(Connection[][] cArr){
     for(int x=0; x<cArr.length; x++){
       for(Connection c : cArr[x]){
-        float chance = random(0,1);
-        if(chance>0.3){
+        if(random(0,1)>0.3){
           float multiplizierer = random(-mutationsrate,mutationsrate);
           c.setWeight(c.getWeight()+c.getWeight() * multiplizierer);
         }
@@ -261,10 +285,42 @@ public class Lebewesen{
     return cArr;
   }
   
+  public Connection[][] mixConnections(Connection[][] c1, Connection[][] c2){ // nimmt an, dass c1 und c2 gleich gross sind
+    
+    // ACHTUNG:
+    // BEI DIESER METHODE WERDEN NUR DIE GEWICHTE VERMISCHT, DA DIE CONNECTIONS IM NN KONSTRUKTOR SOWIESO NEU GEMACHT WERDEN
+    // DAS HEISST DIE CONNECTIONS REFERENZIEREN IMMER NOCH DIE NEURONEN DER ELTERN (liegt an .clone())
+    // ----> NUR FUER ERSTELLEN VON KINDERN VERWENDEN
+    
+    Connection[][] mixedConnections = new Connection[c1.length][];
+    
+    // mixedConnections wird zu Kopie von c1
+    for(int i=0; i<c1.length; i++){
+      mixedConnections[i] = c1[i].clone();
+    }
+    // Gewichte werden vermischt
+    for(int x=0; x<c1.length; x++){
+      for(int y=0; y<c1[0].length; y++){
+        if(random(0,1) > reproduktionsschwellwert){
+          mixedConnections[x][y].setWeight(c2[x][y].getWeight());
+        }
+      }
+    }
+    return mixedConnections;
+  }
+  
+  
   public void altern(){
     alter += map.getZeitProFrame();
     float neuesAlter = (float)(alter * map.getZeitMultiplikator());
     alter = (double)floor(neuesAlter) / (double)map.getZeitMultiplikator();
+    
+    // geburtsbereit
+    if(alter - letzteGeburt >= reproduktionswartezeit){
+      geburtsbereit = true;
+    } else {
+      geburtsbereit = false;
+    }
   }
   
   public void erinnern(float m){
@@ -301,5 +357,17 @@ public class Lebewesen{
   }
   public PVector getPosition(){
     return position;
+  }
+  public double getAlter(){
+    return alter;
+  }
+  public boolean isGeburtsbereit(){
+    return geburtsbereit;
+  }
+  public color getFellfarbe(){
+    return fellFarbe;
+  }
+  public float getDurchmesser(){
+    return durchmesser;
   }
 }

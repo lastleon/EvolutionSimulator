@@ -8,6 +8,7 @@ public class NeuralNetwork{
     
   private int iSLaenge = 11; // Grund in NN_Planung.txt ersichtlich
   private int outputNeuronen = 8; // Grund in NN_Planung.txt ersichtlich
+  
     
   NeuralNetwork(int hS1){ // hiddenSchicht1
     
@@ -22,7 +23,7 @@ public class NeuralNetwork{
     connections1 = new Connection[hS1][iSLaenge];
     for(int i=0; i<hS1; i++){
       for(int i2=0; i2<iSLaenge; i2++){
-        w1 = randomGaussian(); // TEST, vorher randomGaussian()
+        w1 = randomGaussian(); // sollte vielleicht verändert werden
         connections1[i][i2] = new Connection(inputSchicht[i2], w1);
       }
     }
@@ -37,7 +38,7 @@ public class NeuralNetwork{
     connections2 = new Connection[outputNeuronen][hS1];
     for(int i=0; i<outputNeuronen; i++){
       for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian(); // TEST, vorher randomGaussian()
+        w2 = randomGaussian(); // sollte vielleicht verändert werden
         connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
       }
     }
@@ -175,7 +176,6 @@ public class NeuralNetwork{
   public float getAngriffswille(){
     return outputSchicht[7].getWert();
   }
-  
   
   // andere getter
   public Connection[][] getConnections1(){
