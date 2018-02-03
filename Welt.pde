@@ -27,7 +27,7 @@ public class Welt{
     for (int y=0; y<weltGroesse; y++){
       float xNoise = 0.0;
       for(int x=0; x<weltGroesse; x++){
-        welt[x][y] = new Feld(x*fB, y*fB, noise(xNoise, yNoise)*100, fB);
+        welt[x][y] = new Feld(x*fB, y*fB, noise(xNoise, yNoise)*100, fB, x, y);
         xNoise += 0.038;
       }
       yNoise += 0.038;
@@ -55,7 +55,60 @@ public class Welt{
       if(!lw.getStatus()){
         bewohner.remove(bewohner.indexOf(lw));
       }
-      lw.gebaeren(lw.NN.getGeburtwille());
+    }
+    
+    bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
+    
+    for(Lebewesen lw1 : bewohnerCopy){
+      for(Lebewesen lw2 : bewohnerCopy){
+        if(!lw1.equals(lw2) && lw1.collision(lw2)){
+          this.gebaeren(lw1, lw2);
+        }
+      }
+    }
+  }
+  
+  public float entfernungLebewesen(Lebewesen lw1, Lebewesen lw2){
+    //return sqrt(abs(lw1.getPosition().x - lw2.getPosition().x) + abs(lw1.getPosition().y - lw2.getPosition().y));
+    return lw1.getPosition().dist(lw2.getPosition());
+  }
+  
+  public void gebaeren(Lebewesen lw1, Lebewesen lw2){
+    /*                              Beide LW muessen zustimmen                                                                Beide LW muessen genug Energie haben                                Beide LW muessen geburtsbereit sein*/
+    if((lw1.NN.getGeburtwille() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille() > Lebewesen.reproduktionswille) && (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) && (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())){
+      // benötigte Geburtsenergie wird abgezogen
+      lw1.addEnergie(-Lebewesen.geburtsenergie);
+      lw2.addEnergie(-Lebewesen.geburtsenergie);
+      
+      // Dummy-Vectoren
+      PVector posLw1 = new PVector(lw1.getPosition().x, lw1.getPosition().y);
+      PVector posLw2 = new PVector(lw2.getPosition().x, lw2.getPosition().y);
+      
+      // Neues Lebewesen mit gemischten Connections entsteht
+      this.addLebewesen(
+      new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1,
+                    posLw2))*(lw1.getDurchmesser()/2)),
+                    (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)),
+                    lw1.NN.getConnections1(),
+                    lw1.NN.getConnections2(),
+                    lw2.NN.getConnections1(),
+                    lw2.NN.getConnections2(),
+                    lw1.getFellfarbe(),
+                    lw2.getFellfarbe(),
+                    max(lw1.getGeneration(), lw2.getGeneration()),
+                    lw1.getFressrate(),
+                    lw1.getMaxGeschwindigkeit(),
+                    lw1.getReproduktionswartezeit(),
+                    lw1.getAngriffswert(),
+                    
+                    lw2.getFressrate(),
+                    lw2.getMaxGeschwindigkeit(),
+                    lw2.getReproduktionswartezeit(),
+                    lw2.getAngriffswert()
+                    ));
+      println("Ein neues Früchtchen ist entsprungen!");
+      lw1.setLetzteGeburt((float)lw1.getAlter());
+      lw2.setLetzteGeburt((float)lw2.getAlter());
     }
   }
   
@@ -87,22 +140,29 @@ public class Welt{
       lw.input();
       lw.leben();
       lw.altern();
-      lw.bewegen(lw.NN.getGeschwindigkeit(lw), degrees(lw.NN.getRotation()));
+      lw.bewegen(lw.NN.getGeschwindigkeit(lw), lw.NN.getRotation());
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
-      lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
+      //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
-      lw.angriff(lw.NN.getAngriffswille());
+      lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
     }
     
     todUndGeburt();
     
-    felderRegenerieren();
+    felderBewachsen();
     
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
+    if(jahr%1 == 0){
+      double aeltestesLw = 0;
+      for(Lebewesen lw : bewohner){
+        if(lw.getAlter() > aeltestesLw) aeltestesLw = lw.getAlter();
+      }
+      println("Momentan ältestes Lebewsen: " + aeltestesLw);
+    }
     
     showWelt();
     showLebewesen();
@@ -161,10 +221,10 @@ public class Welt{
     noStroke();
   }
   
-  public void felderRegenerieren(){
+  public void felderBewachsen(){
     for(int x=0; x<weltGroesse; x++){
       for(Feld f : welt[x]){
-        f.regenerieren();
+        f.wachsen();
       }
     }
   }
@@ -192,8 +252,15 @@ public class Welt{
    
   }
   
-  public Feld[][] getWelt(){
-    return welt;
+  public Feld getFeldInArray(int x, int y){
+    try{
+      if(x != -1 && x != weltGroesse && y != -1 && y != weltGroesse){ // um die ArrayIndexOutOfBoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist trotzdem zur sicherheit da
+        return welt[x][y];
+      } else return null;
+    } catch(Exception e){
+      e.printStackTrace();
+      return null;
+    }
   }
   
   public Lebewesen getTier(int x,int y){

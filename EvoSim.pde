@@ -10,7 +10,7 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 
-public Welt map = new Welt(200, 100);
+public Welt map = new Welt(200, 300);
 
 void setup(){
   size(1000,1000);
@@ -52,3 +52,11 @@ void mouseReleased(){
   locked = false;
   cursor(ARROW);
 }
+////////////////////////////      TODO       /////////////////////
+/*
+- pro Paarung mehrere Kinder : Entfernen
+- wachsen optimieren
+- moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
+- Farben werden nach einiger Zeit grau
+- Fitness und damit Paarungswahrscheinlichkeit einbauen (Je groesser die Fitness, desto groesser ist der Paarungsradius?)
+*/
