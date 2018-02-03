@@ -9,7 +9,7 @@ public static class AktivierungsFunktion{
   }
   //range -1,1
   static float tanh(float x){
-    return (2/(1+exp(-2*x)))-1;
+    return (exp(x)-exp(-x))/(exp(x)+exp(-x));
   }
   //range 0,infinity
   static float relu(float x){

@@ -54,9 +54,10 @@ void mouseReleased(){
 }
 ////////////////////////////      TODO       /////////////////////
 /*
-- pro Paarung mehrere Kinder : Entfernen
 - wachsen optimieren
 - moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
 - Farben werden nach einiger Zeit grau
-- Fitness und damit Paarungswahrscheinlichkeit einbauen (Je groesser die Fitness, desto groesser ist der Paarungsradius?)
+- Fitness noch nicht vollstaendig implementiert --> muss noch Auswirkung auf die Paarung haben
+- möglichst effizienten Stammbaum erstellen
+- vllt durchschnittliche Lebensdauer der Vorfahren in die Fitnessfunktion --> erstmal Stammbaum
 */

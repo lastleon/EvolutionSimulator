@@ -7,9 +7,15 @@ public class Welt{
   private float weltY;
   private double jahr;
   private float spacing;
-  private int fB;
+  private float fB;
   private double zeitProFrame = 0.0005;
   private int multiplikator = 10000;
+  
+  // Tiere: Standard Werte
+  final public static float stdFressrate = 20;
+  final public static float stdMaxGeschwindigkeit = 2;
+  final public static float stdAngriffswert = 20;
+  final public static float stdReproduktionswartezeit = 0.25;
   
   public Welt(int weltG, int lw){
     
@@ -19,7 +25,7 @@ public class Welt{
     weltGroesse = weltG;
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
-    fB = (int)(fensterGroesse/weltGroesse);
+    fB = fensterGroesse/weltGroesse;
     
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -43,7 +49,7 @@ public class Welt{
         posY = (int)random(0,fensterGroesse);
       } while (!this.getFeld(posX,posY).isLand());
       
-      bewohner.add(new Lebewesen(posX,posY));
+      bewohner.add(new Lebewesen(posX,posY, fB));
       
     }
   }
@@ -74,8 +80,12 @@ public class Welt{
   }
   
   public void gebaeren(Lebewesen lw1, Lebewesen lw2){
-    /*                              Beide LW muessen zustimmen                                                                Beide LW muessen genug Energie haben                                Beide LW muessen geburtsbereit sein*/
-    if((lw1.NN.getGeburtwille() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille() > Lebewesen.reproduktionswille) && (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) && (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())){
+    if((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen // EXPERIMENTELL: geburtswille * fitness
+      &&
+      (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
+      &&
+      (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())) // Beide LW muessen geburtsbereit sein
+      {
       // benötigte Geburtsenergie wird abgezogen
       lw1.addEnergie(-Lebewesen.geburtsenergie);
       lw2.addEnergie(-Lebewesen.geburtsenergie);
@@ -131,7 +141,7 @@ public class Welt{
           posY = (int)random(0,fensterGroesse);
         } while (!this.getFeld(posX,posY).isLand());
         
-        bewohner.add(new Lebewesen(posX,posY));
+        bewohner.add(new Lebewesen(posX, posY, fB));
       }
     }
     
@@ -280,5 +290,8 @@ public class Welt{
   }
   public int getZeitMultiplikator(){
     return multiplikator;
+  }
+  public float getFeldbreite(){
+    return fB;
   }
 }
