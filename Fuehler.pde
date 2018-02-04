@@ -1,6 +1,6 @@
 class Fuehler{
   
-  private int abstand = 15;
+  private float abstand;
   
   private PVector position;
   private PVector ausrichtung;
@@ -8,9 +8,10 @@ class Fuehler{
   private Lebewesen lw;
   
   Fuehler(Lebewesen l){
+    lw = l;
+    abstand = lw.getDurchmesser()*1.25;
     ausrichtung = new PVector(abstand,0);
     position = new PVector(0,0);
-    lw = l;
   }
   
   //updated und malt den Fühler
@@ -39,7 +40,7 @@ class Fuehler{
       line(position.x, position.y, lw.position.x, lw.position.y);
     }
     
-    ellipse(position.x, position.y, lw.durchmesser/2, lw.durchmesser/2);
+    ellipse(position.x, position.y, lw.getDurchmesser()/4, lw.getDurchmesser()/4);
   }
   
   public void fuehlerRotieren(float angle){
