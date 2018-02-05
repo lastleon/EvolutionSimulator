@@ -68,6 +68,8 @@ class Fuehler{
   public float getRichtung(){
     return degrees(ausrichtung.heading());
   }
-  
+  public float getFuehlerFeldArt(){
+    return map.getFeld((int)position.x, (int)position.y).isLandInt();
+  }
   
 }

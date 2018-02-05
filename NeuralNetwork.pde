@@ -6,7 +6,7 @@ public class NeuralNetwork{
   private Connection[][] connections2;
   private WorkingNeuron[] outputSchicht;
     
-  private int iSLaenge = 11; // Grund in NN_Planung.txt ersichtlich
+  private int iSLaenge = 14; // Grund in NN_Planung.txt ersichtlich
   private int outputNeuronen = 8; // Grund in NN_Planung.txt ersichtlich
   
     
@@ -97,54 +97,48 @@ public class NeuralNetwork{
   public InputNeuron getInputNEnergie(){
     return inputSchicht[1];
   }
-  /*
   public InputNeuron getInputNFeldart(){
     return inputSchicht[2];
   }
-  */
   public InputNeuron getInputNMemory(){
-    return inputSchicht[2];
-  }
-  public InputNeuron getInputNBias(){
     return inputSchicht[3];
   }
-  public InputNeuron getInputNRichtung(){
+  public InputNeuron getInputNBias(){
     return inputSchicht[4];
+  }
+  public InputNeuron getInputNRichtung(){
+    return inputSchicht[5];
   }
   ////Fuehler
   
   // 1. Fuehler
   public InputNeuron getInputNFuehlerRichtung1(){
-    return inputSchicht[5];
-  }
-  public InputNeuron getInputNFuehlerGegnerEnergie1(){
     return inputSchicht[6];
   }
-  public InputNeuron getInputNFuehlerFeldEnergie1(){
+  public InputNeuron getInputNFuehlerGegnerEnergie1(){
     return inputSchicht[7];
   }
-  /*
+  public InputNeuron getInputNFuehlerFeldEnergie1(){
+    return inputSchicht[8];
+  }
   public InputNeuron getInputNFuehlerFeldArt1(){
     return inputSchicht[9];
   }
-  */
   
   // 2. Fuehler
   
     public InputNeuron getInputNFuehlerRichtung2(){
-    return inputSchicht[8];
-  }
-  public InputNeuron getInputNFuehlerGegnerEnergie2(){
-    return inputSchicht[9];
-  }
-  public InputNeuron getInputNFuehlerFeldEnergie2(){
     return inputSchicht[10];
   }
-  /*
+  public InputNeuron getInputNFuehlerGegnerEnergie2(){
+    return inputSchicht[11];
+  }
+  public InputNeuron getInputNFuehlerFeldEnergie2(){
+    return inputSchicht[12];
+  }
   public InputNeuron getInputNFuehlerFeldArt2(){
     return inputSchicht[13];
   }
-  */
   
   
   // OutputNeuronen

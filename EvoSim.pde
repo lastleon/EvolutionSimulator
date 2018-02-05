@@ -1,5 +1,10 @@
+import java.util.Scanner;
+
 PrintWriter output1;
 PrintWriter output2;
+PrintWriter output3;
+PrintWriter output4;
+
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 final int fensterGroesse = 1000;
 private int weltGroesse;
@@ -11,27 +16,41 @@ private float yOffsetGesamt = 0.0;
 private float xPressed, yPressed;
 private boolean locked = false;
 int fileNumber;
+
+boolean save;
+
+int currentID = 0;
+
 public Welt map = new Welt(200, 300);
 
 void setup(){
   size(1000,1000);
   noStroke();
   skalierungsfaktor = 1;
-  map.showWelt();
-  map.showLebewesen(map.getLebewesen());
   frameRate(50);
   
-  if (!fileExists(sketchPath("saveDataIndex.dat"))) {
-    fileNumber = 1;
-    byte[] b = {1};
-    saveBytes("saveDataIndex.dat", b);
-  } else {
-    fileNumber = bytesToInt(loadBytes("saveDataIndex.dat")) + 1;
-    saveBytes("saveDataIndex.dat", intToBytes(fileNumber));
+  save = true;
+  
+  if(save){
+    if (!fileExists(sketchPath("saveDataIndex.dat"))) {
+      fileNumber = 1;
+      byte[] b = {1};
+      saveBytes("saveDataIndex.dat", b);
+    } else {
+      fileNumber = bytesToInt(loadBytes("saveDataIndex.dat")) + 1;
+      saveBytes("saveDataIndex.dat", intToBytes(fileNumber));
+    }
+    
+    output1 = createWriter("./data/ältestesLw/ältestesLw"+fileNumber+".txt");
+    output2 = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
+    output3 = createWriter("./data/durchschnittsFitnessLw/durchschnittsFitnessLw"+fileNumber+".txt");
+    output4 = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
   }
   
-  output1 = createWriter("./data/ältestesLw/ältestesLw"+fileNumber+".txt");
-  output2 = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
+  
+  
+  map.showWelt();
+  map.showLebewesen(map.getLebewesen());
   
 }
 
@@ -93,6 +112,33 @@ boolean fileExists(String path) {
   } else {
     return false;
   }
+}
+
+boolean askToPlot(){
+  boolean plot;
+  Scanner scanner = new Scanner(System.in);
+  String uInput;
+  
+  println("Soll die Simulations geplotted werden (y/n) ? ");
+  while(true){
+    uInput = scanner.nextLine();
+    switch(uInput){
+      case "y":
+        plot = true;
+        break;
+      case "n":
+        plot = false;
+        break;
+      default:
+        println("Illegal Statement");
+        continue;
+    }
+    scanner.close();
+    break;
+  }
+  
+  return plot;
+  
 }
 ////////////////////////////      TODO       /////////////////////
 /*

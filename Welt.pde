@@ -10,6 +10,10 @@ public class Welt{
   private float fB;
   private double zeitProFrame = 0.0005;
   private int multiplikator = 10000;
+  private float gesamtFitness = 0;
+  private float gesamtAlter = 0;
+  private int geburtenProJahr;
+  private int todeProJahr;
   
   // Tiere: Standard Werte
   final public static float stdFressrate = 20;
@@ -49,8 +53,8 @@ public class Welt{
         posY = (int)random(0,fensterGroesse);
       } while (!this.getFeld(posX,posY).isLand());
       
-      bewohner.add(new Lebewesen(posX,posY, fB));
-      
+      bewohner.add(new Lebewesen(posX,posY, fB, currentID));
+      currentID++;
     }
   }
   
@@ -60,6 +64,7 @@ public class Welt{
     for(Lebewesen lw : bewohnerCopy){
       if(!lw.getStatus()){
         bewohner.remove(bewohner.indexOf(lw));
+        todeProJahr++;
       }
     }
     
@@ -80,11 +85,14 @@ public class Welt{
   }
   
   public void gebaeren(Lebewesen lw1, Lebewesen lw2){
-    if((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen // EXPERIMENTELL: geburtswille * fitness
+    if((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen
       &&
       (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
       &&
-      (lw1.isGeburtsbereit() && lw2.isGeburtsbereit())) // Beide LW muessen geburtsbereit sein
+      (lw1.isGeburtsbereit() && lw2.isGeburtsbereit()) // Beide LW muessen geburtsbereit sein
+      //&&
+      //(lw1.calculateFitnessStandard() > this.getDurchschnittsFitness() && lw2.calculateFitnessStandard() > this.getDurchschnittsFitness()) // funktioniert nur bei Standardfitness
+      )
       {
       // benötigte Geburtsenergie wird abgezogen
       lw1.addEnergie(-Lebewesen.geburtsenergie);
@@ -114,10 +122,15 @@ public class Welt{
                     lw2.getFressrate(),
                     lw2.getMaxGeschwindigkeit(),
                     lw2.getReproduktionswartezeit(),
-                    lw2.getAngriffswert()
+                    lw2.getAngriffswert(),
+                    
+                    currentID
                     ));
+      currentID++;
       lw1.setLetzteGeburt((float)lw1.getAlter());
       lw2.setLetzteGeburt((float)lw2.getAlter());
+      
+      geburtenProJahr++;
     }
   }
   
@@ -140,11 +153,14 @@ public class Welt{
           posY = (int)random(0,fensterGroesse);
         } while (!this.getFeld(posX,posY).isLand());
         
-        bewohner.add(new Lebewesen(posX, posY, fB));
+        bewohner.add(new Lebewesen(posX, posY, fB, currentID));
+        currentID++;
       }
     }
     
-    float gesamtAlter = 0;
+    gesamtAlter = 0;
+    gesamtFitness = 0;
+    
     for(Lebewesen lw : bewohner){
       lw.input();
       lw.leben();
@@ -156,7 +172,10 @@ public class Welt{
       lw.fuehlerRotieren1(lw.NN.getRotationFuehler1());
       lw.fuehlerRotieren2(lw.NN.getRotationFuehler2());
       lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
+      
       gesamtAlter += lw.getAlter();
+      gesamtFitness += lw.calculateFitnessStandard(); // funktioniert nur bei Standardfitness
+      
     }
     
     todUndGeburt();
@@ -166,15 +185,29 @@ public class Welt{
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
-    if((jahr*100)%1 == 0){
-      double aeltestesLw = 0;
-      for(Lebewesen lw : bewohner){
-        if(lw.getAlter() > aeltestesLw) aeltestesLw = lw.getAlter();
+    if(save){
+      if((jahr*100)%1 == 0){
+        double aeltestesLwAlter = 0;
+        int aeltestesLwID = 0; // 0 ist Dummywert
+        for(Lebewesen lw : bewohner){
+          if(lw.getAlter() > aeltestesLwAlter){
+            aeltestesLwAlter = lw.getAlter();
+            aeltestesLwID = lw.getID();
+          }
+        }
+        output1.print("(" + jahr + "," + aeltestesLwAlter + "," + aeltestesLwID + ");");
+        output1.flush();
+        output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
+        output2.flush();
+        output3.print("(" + jahr + "," + gesamtFitness/bewohner.size() + ");");
+        output3.flush();
       }
-      output1.print("(" + jahr + "," + aeltestesLw + ");");
-      output1.flush();
-      output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
-      output2.flush();
+      if(jahr%1==0){
+        output4.print("(" + jahr + "," + todeProJahr + "," + geburtenProJahr + ");");
+        output4.flush();
+        geburtenProJahr = 0;
+        todeProJahr = 0;
+      }
     }
     
     showWelt();
@@ -297,4 +330,8 @@ public class Welt{
   public float getFeldbreite(){
     return fB;
   }
+  public float getDurchschnittsFitness(){ // funktioniert nur bei Standardfitness
+    return gesamtFitness/bewohner.size();
+  }
+  
 }
