@@ -106,6 +106,8 @@ public class Lebewesen {
   }
 
   public void drawLebewesen() {
+    PVector richtung = new PVector(geschwindigkeit.x, geschwindigkeit.y);
+    durchmesser = map.stdDurchmesser * energie/2000 + 10 ;
     if (rotzeit == 0) {
       fill(fellFarbe);
     } else if (rot) {
@@ -120,7 +122,9 @@ public class Lebewesen {
     }
     fuehler1.drawFuehler();
     fuehler2.drawFuehler();
-    ellipse(position.x, position.y, durchmesser, durchmesser);
+    richtung.setMag(durchmesser/2);
+    ellipse(position.x, position.y, durchmesser , durchmesser );
+    line(position.x,position.y,position.x + richtung.x,position.y + richtung .y);
   }
 
   // NeuralNetwork input

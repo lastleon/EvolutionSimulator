@@ -14,12 +14,15 @@ public class Welt{
   private float gesamtAlter = 0;
   private int geburtenProJahr;
   private int todeProJahr;
+  private int geburten = 0;
   
   // Tiere: Standard Werte
   final public static float stdFressrate = 20;
   final public static float stdMaxGeschwindigkeit = 2;
   final public static float stdAngriffswert = 20;
   final public static float stdReproduktionswartezeit = 0.25;
+  float stdDurchmesser;
+  
   
   public Welt(int weltG, int lw){
     
@@ -30,6 +33,7 @@ public class Welt{
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
     fB = fensterGroesse/weltGroesse;
+    stdDurchmesser = fB * 1.5;
     
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -101,7 +105,8 @@ public class Welt{
       // Dummy-Vectoren
       PVector posLw1 = new PVector(lw1.getPosition().x, lw1.getPosition().y);
       PVector posLw2 = new PVector(lw2.getPosition().x, lw2.getPosition().y);
-      
+      geburten++;
+      println("geburt" + geburten);
       // Neues Lebewesen mit gemischten Connections entsteht
       this.addLebewesen(
       new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1,
@@ -333,5 +338,6 @@ public class Welt{
   public float getDurchschnittsFitness(){ // funktioniert nur bei Standardfitness
     return gesamtFitness/bewohner.size();
   }
+  
   
 }

@@ -6,7 +6,7 @@ class Feld {
   private float energiewert = 0;
   private float maxEnergiewert;
   private float feldBreite;
-  private float maxRegenerationsrate = 0.8;
+  private float maxRegenerationsrate = 1;
 
   private int arrayPosX;
   private int arrayPosY;
@@ -79,6 +79,8 @@ class Feld {
         bewachsen.remove(feldToRemove);
       }
     }
+    regenerationsrate *= meeresspiegel+20/nHoehe;
+    if(regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
     energiewert += regenerationsrate;
     if (energiewert > maxEnergiewert){
     energiewert = maxEnergiewert;

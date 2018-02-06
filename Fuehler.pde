@@ -19,6 +19,7 @@ class Fuehler{
     
     // Fühlerposition wird erstellt
     position.set(lw.position.x, lw.position.y); //                               lw.position.copy() wurder manchmal null, keine Ahnung wieso
+    ausrichtung.setMag(lw.getDurchmesser() + lw.energie/200);
     position.add(ausrichtung);
     
     // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind

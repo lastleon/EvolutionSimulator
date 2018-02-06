@@ -4,7 +4,7 @@ PrintWriter output1;
 PrintWriter output2;
 PrintWriter output3;
 PrintWriter output4;
-
+int b =1;
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 final int fensterGroesse = 1000;
 private int weltGroesse;
@@ -21,7 +21,7 @@ boolean save;
 
 int currentID = 0;
 
-public Welt map = new Welt(200, 300);
+public Welt map = new Welt(200, 200);
 
 void setup(){
   size(1000,1000);
@@ -55,8 +55,10 @@ void setup(){
 }
 
 void draw(){
+  for(int i=0;i<b;i++){
   map.update();
-}
+
+  }}
 
 // Eventhandler
 void mouseWheel(MouseEvent event){
@@ -75,6 +77,15 @@ void mouseDragged(){
     yPressed = mouseY;
     cursor(MOVE);
   }
+}
+void keyPressed(){
+if(key=='w'){
+  b  = 100;
+}
+if(key=='s'){
+  b  = 1;
+
+}
 }
 void mousePressed(){
   locked = true;
