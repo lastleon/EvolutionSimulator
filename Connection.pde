@@ -1,5 +1,4 @@
 class Connection{
-  // kommt noch
   private Neuron inputN;
   private float weight;
   
@@ -11,6 +10,9 @@ class Connection{
   // getter
   public float getWert(){
     return inputN.getWert()*weight;
+  }
+  public float getWeight(){
+    return weight;
   }
   // setter
   public void setWeight(float w){

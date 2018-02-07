@@ -1,6 +1,6 @@
-ï»¿FÃ¼hler:
-	- FÃ¼hler fÃ¤hrt autonom
-	- 2 FÃ¼hler
+Fühler:
+	- Fühler fährt autonom
+	- 2 Fühler
 
 Fortpflanzung:
 	-asexuell & sexuell
@@ -14,25 +14,34 @@ Gene:
 
 NN:
 input:
-- FÃ¼hler
+- Fühler
 	- Feldenergie
 	- Gegner
-	- genetische Differenz (alle gene werden verglichen)
+	// - genetische Differenz (alle gene werden verglichen)
 	- gegnerische Energie
 	- Feldart
+- Fühler Richtung TODO
 - eigene Farbe
 - eigene Energie
 - Feldart
 - Geschwindigkeit
 - Memory
 - Bias
+evtl noch Richtung
 
 Output:
 - Geschwindigkeit
 - Rotation
-//- Fortpflanzungswille
-//- Attackieren
-- Fressen
-//- FÃ¼hlerdrehen1
-//- FÃ¼hlerdrehen1
+- Rotation Fühler TODO
+// - Fortpflanzungswille
+//- Attakieren
+- Fresswille
 - Memory
+- Fell Rot
+- Fell Gruen
+- Fell Blau
+
+TODO:
+
+- code optimieren
+- Spastiken entfernen
