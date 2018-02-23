@@ -56,6 +56,7 @@ class Feld {
       if (!feld.isLand()) {
         regenerationsrate = maxRegenerationsrate;
         skip = true;
+        break;
       }
     }
     if (!skip) {

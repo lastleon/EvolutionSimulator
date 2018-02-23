@@ -1,181 +1,142 @@
-public class NeuralNetwork{
-  
-  private InputNeuron[] inputSchicht;
-  private Connection[][] connections1;
-  private WorkingNeuron[] hiddenSchicht1;
-  private Connection[][] connections2;
-  private WorkingNeuron[] outputSchicht;
-    
+public class NeuralNetwork {
+
+  Matrix inputSchicht;
+  Matrix w1;
+  Matrix hiddenSchicht1;
+  Matrix w2;
+  Matrix outputSchicht;
+
+
   private int iSLaenge = 14; // Grund in NN_Planung.txt ersichtlich
-  private int outputNeuronen = 8; // Grund in NN_Planung.txt ersichtlich
-  
-    
-  NeuralNetwork(int hS1){ // hiddenSchicht1
-    
+  private int oSLaenge = 8; // Grund in NN_Planung.txt ersichtlich
+
+
+  NeuralNetwork(int hS1) { // hiddenSchicht1
     // Input Neuronen werden erstellt
-    inputSchicht = new InputNeuron[iSLaenge];
-    for(int i=0; i<iSLaenge; i++){
-      inputSchicht[i] = new InputNeuron();
-    }
+    inputSchicht = new Matrix(iSLaenge, 1);
     
-    float w1;
-    // random-gewichtete connections werden erstellt
-    connections1 = new Connection[hS1][iSLaenge];
-    for(int i=0; i<hS1; i++){
-      for(int i2=0; i2<iSLaenge; i2++){
-        w1 = randomGaussian(); // sollte vielleicht verändert werden
-        connections1[i][i2] = new Connection(inputSchicht[i2], w1);
-      }
-    }
+    w1 = new Matrix(hS1, iSLaenge);
+    w1.setRandom(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge));
     
+    hiddenSchicht1 = new Matrix(hS1,1);
     // Hidden Neuronen (1 Schicht) werden erstellt
-    hiddenSchicht1 = new WorkingNeuron[hS1];
-    for(int i=0; i<hS1; i++){
-      hiddenSchicht1[i] = new WorkingNeuron(connections1[i]);
-    }
+    w2 = new Matrix(oSLaenge, hS1);
+    w2.setRandom(-1/sqrt(hS1), 1/sqrt(hS1));
     
-    float w2;
-    connections2 = new Connection[outputNeuronen][hS1];
-    for(int i=0; i<outputNeuronen; i++){
-      for(int i2=0; i2<hS1; i2++){
-        w2 = randomGaussian(); // sollte vielleicht verändert werden
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2],w2);
-      }
-    }
-    // Output Neuronen werden erstellt
-    outputSchicht = new WorkingNeuron[outputNeuronen];
-    for(int i=0; i<outputNeuronen; i++){
-      outputSchicht[i] = new WorkingNeuron(connections2[i]);
-    }    
+    outputSchicht = new Matrix(oSLaenge,1);
   }
-  
-    
-  NeuralNetwork(int hS1, Connection[][] c1, Connection[][] c2){ // hiddenSchicht1
-    
+
+
+  NeuralNetwork(int hS1, Matrix c1, Matrix c2) { // hiddenSchicht1
     // Input Neuronen werden erstellt
-    inputSchicht = new InputNeuron[iSLaenge];
-    for(int i=0; i<iSLaenge; i++){
-      inputSchicht[i] = new InputNeuron();
-    }
+    inputSchicht = new Matrix(iSLaenge, 1);
     
-    // connections mit Gewichten der Eltern werden erstellt
-    connections1 = new Connection[hS1][iSLaenge];
-    for(int i=0; i<hS1; i++){
-      for(int i2=0; i2<iSLaenge; i2++){
-        connections1[i][i2] = new Connection(inputSchicht[i2], c1[i][i2].getWeight());
-      }
-    }
+    w1 = new Matrix(hS1, iSLaenge);
+    w1.set(c1.m);
     
+    hiddenSchicht1 = new Matrix(hS1,1);
     // Hidden Neuronen (1 Schicht) werden erstellt
-    hiddenSchicht1 = new WorkingNeuron[hS1];
-    for(int i=0; i<hS1; i++){
-      hiddenSchicht1[i] = new WorkingNeuron(connections1[i]);
-    }
+    w2 = new Matrix(oSLaenge, hS1);
+    w2.set(c2.m);
     
-    connections2 = new Connection[outputNeuronen][hS1];
-    for(int i=0; i<outputNeuronen; i++){
-      for(int i2=0; i2<hS1; i2++){
-        connections2[i][i2] = new Connection(hiddenSchicht1[i2], c2[i][i2].getWeight());
-      }
-    }
-    
-    // Output Neuronen werden erstellt
-    outputSchicht = new WorkingNeuron[outputNeuronen];
-    for(int i=0; i<outputNeuronen; i++){
-      outputSchicht[i] = new WorkingNeuron(connections2[i]);
-    }
+    outputSchicht = new Matrix(oSLaenge,1);
   }
-  
-  
- 
-  
+
+
+  public void update() {
+    hiddenSchicht1.mult(inputSchicht,w1);
+    hiddenSchicht1.sigmoid();
+    outputSchicht.mult(hiddenSchicht1,w2);
+    outputSchicht.sigmoid();
+  }
+
   //// getter
   // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
-  public InputNeuron getInputNGeschwindigkeit(){
-    return inputSchicht[0];
+  public void setInputNGeschwindigkeit(float v) {
+    inputSchicht.set(0, 0, v);
   }
-  public InputNeuron getInputNEnergie(){
-    return inputSchicht[1];
+  public void setInputNEnergie(float v) {
+    inputSchicht.set(1, 0, v);
   }
-  public InputNeuron getInputNFeldart(){
-    return inputSchicht[2];
+  public void setInputNFeldart(float v) {
+    inputSchicht.set(2, 0, v);
   }
-  public InputNeuron getInputNMemory(){
-    return inputSchicht[3];
+  public void setInputNMemory(float v) {
+    inputSchicht.set(3, 0, v);
   }
-  public InputNeuron getInputNBias(){
-    return inputSchicht[4];
+  public void setInputNBias(float v) {
+    inputSchicht.set(4, 0, v);
   }
-  public InputNeuron getInputNRichtung(){
-    return inputSchicht[5];
+  public void setInputNRichtung(float v) {
+    inputSchicht.set(5, 0, v);
   }
   ////Fuehler
-  
+
   // 1. Fuehler
-  public InputNeuron getInputNFuehlerRichtung1(){
-    return inputSchicht[6];
+  public void setInputNFuehlerRichtung1(float v) {
+    inputSchicht.set(6, 0, v);
   }
-  public InputNeuron getInputNFuehlerGegnerEnergie1(){
-    return inputSchicht[7];
+  public void setInputNFuehlerGegnerEnergie1(float v) {
+    inputSchicht.set(7, 0, v);
   }
-  public InputNeuron getInputNFuehlerFeldEnergie1(){
-    return inputSchicht[8];
+  public void setInputNFuehlerFeldEnergie1(float v) {
+    inputSchicht.set(8, 0, v);
   }
-  public InputNeuron getInputNFuehlerFeldArt1(){
-    return inputSchicht[9];
+  public void setInputNFuehlerFeldArt1(float v) {
+    inputSchicht.set(9, 0, v);
   }
-  
+
   // 2. Fuehler
-  
-    public InputNeuron getInputNFuehlerRichtung2(){
-    return inputSchicht[10];
+
+  public void setInputNFuehlerRichtung2(float v) {
+    inputSchicht.set(10, 0, v);
   }
-  public InputNeuron getInputNFuehlerGegnerEnergie2(){
-    return inputSchicht[11];
+  public void setInputNFuehlerGegnerEnergie2(float v) {
+    inputSchicht.set(11, 0, v);
   }
-  public InputNeuron getInputNFuehlerFeldEnergie2(){
-    return inputSchicht[12];
+  public void setInputNFuehlerFeldEnergie2(float v) {
+    inputSchicht.set(12, 0, v);
   }
-  public InputNeuron getInputNFuehlerFeldArt2(){
-    return inputSchicht[13];
+  public void setInputNFuehlerFeldArt2(float v) {
+    inputSchicht.set(13, 0, v);
   }
-  
-  
+
+
   // OutputNeuronen
-  public float getGeschwindigkeit(Lebewesen lw){
-    return outputSchicht[0].getWert() * lw.getMaxGeschwindigkeit();
+  public float getGeschwindigkeit(Lebewesen lw) {
+    return outputSchicht.get(0, 0) * lw.getMaxGeschwindigkeit();
   }
-  public float getRotation(){
-    return map(outputSchicht[1].getWert(), 0, 1, -Lebewesen.maxRotationswinkelBewegung/2, Lebewesen.maxRotationswinkelBewegung/2); // muss noch sehen, wie die Rotation wirklich laeuft
+  public float getRotation() {
+    return map(outputSchicht.get(1, 0), 0, 1, -Lebewesen.maxRotationswinkelBewegung/2, Lebewesen.maxRotationswinkelBewegung/2); // muss noch sehen, wie die Rotation wirklich laeuft
   }
-  public float getMemory(){
-    return outputSchicht[2].getWert();
+  public float getMemory() {
+    return outputSchicht.get(2, 0);
   }
   // Fuehler
-  public float getRotationFuehler1(){
-    return map(outputSchicht[3].getWert(), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+  public float getRotationFuehler1() {
+    return map(outputSchicht.get(3, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
   }
-  public float getRotationFuehler2(){
-    return map(outputSchicht[4].getWert(), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
+  public float getRotationFuehler2() {
+    return map(outputSchicht.get(4, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
   }
-  
-  
-  public float getFresswille(){
-    return outputSchicht[5].getWert();
+
+
+  public float getFresswille() {
+    return outputSchicht.get(5, 0);
   }
-  public float getGeburtwille(){
-    return outputSchicht[6].getWert();
+  public float getGeburtwille() {
+    return outputSchicht.get(6, 0);
   }
-  
-  public float getAngriffswille(){
-    return outputSchicht[7].getWert();
+
+  public float getAngriffswille() {
+    return outputSchicht.get(7, 0);
   }
-  
+
   // andere getter
-  public Connection[][] getConnections1(){
-    return connections1;
+  public Matrix getConnections1() {
+    return w1;
   }
-  public Connection[][] getConnections2(){
-    return connections2;
+  public Matrix getConnections2() {
+    return w2;
   }
 }

@@ -1,9 +1,8 @@
-import java.util.Scanner;
-
 PrintWriter output1;
 PrintWriter output2;
 PrintWriter output3;
 PrintWriter output4;
+
 int b =1;
 // fenstergroesse muss seperat geändert werden, sollte immer gleich sein & einen schönen Wert haben, z.B. 100, 500,...
 final int fensterGroesse = 1000;
@@ -23,15 +22,15 @@ int currentID = 0;
 
 public Welt map = new Welt(200, 200);
 
-void setup(){
-  size(1000,1000);
+void setup() {
+  size(1000, 1000);
   noStroke();
   skalierungsfaktor = 1;
   frameRate(50);
-  
+
   save = true;
-  
-  if(save){
+
+  if (save) {
     if (!fileExists(sketchPath("saveDataIndex.dat"))) {
       fileNumber = 1;
       byte[] b = {1};
@@ -40,35 +39,37 @@ void setup(){
       fileNumber = bytesToInt(loadBytes("saveDataIndex.dat")) + 1;
       saveBytes("saveDataIndex.dat", intToBytes(fileNumber));
     }
-    
+
     output1 = createWriter("./data/ältestesLw/ältestesLw"+fileNumber+".txt");
     output2 = createWriter("./data/durchschnittsLw/durchschnittsLw"+fileNumber+".txt");
     output3 = createWriter("./data/durchschnittsFitnessLw/durchschnittsFitnessLw"+fileNumber+".txt");
     output4 = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
   }
-  
-  
-  
+
+
+
   map.showWelt();
   map.showLebewesen(map.getLebewesen());
-  
 }
 
-void draw(){
-  for(int i=0;i<b;i++){
-  map.update();
-
-  }}
+void draw() {
+  try{
+  for (int i=0; i<b; i++) {
+    map.update();
+  }
+  }catch(Exception e){
+    e.printStackTrace();
+  }
+}
 
 // Eventhandler
-void mouseWheel(MouseEvent event){
+void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-  
+
   skalierungsfaktor -= e / 10;
-  
 }
-void mouseDragged(){
-  if (locked){
+void mouseDragged() {
+  if (locked) {
     xOffset = (mouseX - xPressed) * skalierungsfaktor;
     yOffset = (mouseY - yPressed) * skalierungsfaktor;
     xOffsetGesamt += xOffset;
@@ -78,21 +79,24 @@ void mouseDragged(){
     cursor(MOVE);
   }
 }
-void keyPressed(){
-if(key=='w'){
-  b  = 100;
+void keyPressed() {
+  if (key=='w') {
+    b  = 100;
+  }
+  if (key=='s') {
+    b  = 1;
+  }
 }
-if(key=='s'){
-  b  = 1;
-
-}
-}
-void mousePressed(){
+void mousePressed() {
   locked = true;
   xPressed = mouseX;
   yPressed = mouseY;
+  if (map.keiner.isPressed())map.graph = "keiner";
+  if (map.bAeltestes.isPressed())map.graph = "aeltestes";
+  if (map.bAltersschnitt.isPressed())map.graph = "schnitt";
+  if (map.bFitness.isPressed())map.graph = "fitness";
 }
-void mouseReleased(){
+void mouseReleased() {
   locked = false;
   cursor(ARROW);
 }
@@ -125,38 +129,12 @@ boolean fileExists(String path) {
   }
 }
 
-boolean askToPlot(){
-  boolean plot;
-  Scanner scanner = new Scanner(System.in);
-  String uInput;
-  
-  println("Soll die Simulations geplotted werden (y/n) ? ");
-  while(true){
-    uInput = scanner.nextLine();
-    switch(uInput){
-      case "y":
-        plot = true;
-        break;
-      case "n":
-        plot = false;
-        break;
-      default:
-        println("Illegal Statement");
-        continue;
-    }
-    scanner.close();
-    break;
-  }
-  
-  return plot;
-  
-}
 ////////////////////////////      TODO       /////////////////////
 /*
 - wachsen optimieren
-- moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
-- Farben werden nach einiger Zeit grau
-- Fitness noch nicht vollstaendig implementiert --> muss noch Auswirkung auf die Paarung haben
-- möglichst effizienten Stammbaum erstellen
-- vllt durchschnittliche Lebensdauer der Vorfahren in die Fitnessfunktion --> erstmal Stammbaum
-*/
+ - moegliche Fehler koennen beim Kopieren der Connections auftreten (falsche Referenzen, etc...)
+ - Farben werden nach einiger Zeit grau
+ - Fitness noch nicht vollstaendig implementiert --> muss noch Auswirkung auf die Paarung haben
+ - möglichst effizienten Stammbaum erstellen
+ - vllt durchschnittliche Lebensdauer der Vorfahren in die Fitnessfunktion --> erstmal Stammbaum
+ */

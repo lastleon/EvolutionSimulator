@@ -15,6 +15,17 @@ public class Welt{
   private int geburtenProJahr;
   private int todeProJahr;
   private int geburten = 0;
+  Plot fitness;
+  Plot altersschnitt;
+  Plot aeltestes;
+  Button bFitness;
+  Button bAltersschnitt;
+  Button bAeltestes;
+  Button keiner;
+  
+  String graph = "keiner";
+  
+  
   
   // Tiere: Standard Werte
   final public static float stdFressrate = 20;
@@ -28,8 +39,21 @@ public class Welt{
     
     jahr = 0;
     lwZahl = lw;
-    
     weltGroesse = weltG;
+    //plots
+    fitness = new Plot(0,250,200,200);
+    altersschnitt = new Plot(0,250,200,200);
+    aeltestes = new Plot(0,250,200,200);
+    fitness.addValues(0,0);
+    altersschnitt.addValues(0,0);
+    aeltestes.addValues(0,0);
+    
+    //Buttons Interface: x:200, y: 250
+    bFitness = new Button(0,50,100,50,"DurchschnittsFitness");
+    bAltersschnitt = new Button(100,50,100,50,"DurchschnittsAlter");
+    bAeltestes = new Button(0,100,100,50,"AeltestesAlter");
+    keiner = new Button(100,100,100,50,"kein Graph");
+    
     
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
     fB = fensterGroesse/weltGroesse;
@@ -80,6 +104,16 @@ public class Welt{
           this.gebaeren(lw1, lw2);
         }
       }
+    }
+    
+    if(bewohner.size() > lwZahl*2){
+      Lebewesen schw = bewohner.get(0);
+      for(int i = 0;i<lwZahl;i++){
+        if(bewohner.get(i).calculateFitnessStandard()<schw.calculateFitnessStandard()){
+          schw = bewohner.get(i);
+        }
+      }
+      bewohner.remove(bewohner.indexOf(schw));
     }
   }
   
@@ -168,6 +202,7 @@ public class Welt{
     
     for(Lebewesen lw : bewohner){
       lw.input();
+      lw.NN.update();
       lw.leben();
       lw.altern();
       lw.bewegen(lw.NN.getGeschwindigkeit(lw), lw.NN.getRotation());
@@ -187,6 +222,8 @@ public class Welt{
     
     felderBewachsen();
     
+   
+    
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
@@ -200,6 +237,9 @@ public class Welt{
             aeltestesLwID = lw.getID();
           }
         }
+        fitness.addValues((float)jahr,(float)gesamtFitness/bewohner.size());
+        aeltestes.addValues((float)jahr,(float)aeltestesLwAlter);
+        altersschnitt.addValues((float)jahr,(float)gesamtAlter/bewohner.size());
         output1.print("(" + jahr + "," + aeltestesLwAlter + "," + aeltestesLwID + ");");
         output1.flush();
         output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
@@ -218,6 +258,10 @@ public class Welt{
     showWelt();
     showLebewesen();
     showInterface();
+    if(graph == "fitness")fitness.show();
+    if(graph == "aeltestes")aeltestes.show();
+    if(graph == "schnitt")altersschnitt.show();
+    
   }
   // Lebewesen hinzufügen
   public void addLebewesen(Lebewesen lw){
@@ -226,6 +270,7 @@ public class Welt{
   
   // Interface
   public void showInterface(){
+
     String jahre = "Jahre: " + jahr;
     fill(50, 200);
     rect(weltX,weltY, 200/skalierungsfaktor, 250/skalierungsfaktor);
@@ -235,7 +280,13 @@ public class Welt{
     textAlign(LEFT);
     text(jahre, weltX + spacing, weltY + spacing);
     
-    text("Bewohner: " + bewohner.size(), weltX + spacing*2, weltY + spacing*2);
+    text("Bewohner: " + bewohner.size(), weltX + spacing, weltY + spacing*2);
+    
+    bFitness.show();
+    bAltersschnitt.show();
+    bAeltestes.show();
+    keiner.show();
+    
   }
   
   // zeichnet die Welt

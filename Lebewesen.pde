@@ -63,7 +63,7 @@ public class Lebewesen {
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  Lebewesen(int x, int y, Connection[][] c11, Connection[][] c12, Connection[][] c21, Connection[][] c22, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
+  Lebewesen(int x, int y, Matrix c11, Matrix c12,Matrix c21, Matrix c22, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
     id = ID;
     durchmesser = map.getFeldbreite()*1.5;
 
@@ -85,11 +85,11 @@ public class Lebewesen {
     fellFarbe = fellfarbeMutieren(fellFarbe);
 
     // Connections
-    Connection[][] c1;
-    Connection[][] c2;
+    Matrix c1;
+    Matrix c2;
 
-    c1 = this.mixConnections(c11, c21);
-    c2 = this.mixConnections(c12, c22);
+    c1 = this.mixMatrix(c11, c21);
+    c2 = this.mixMatrix(c12, c22);
 
     c1 = mutieren(c1);
     c2 = mutieren(c2);
@@ -130,43 +130,43 @@ public class Lebewesen {
   // NeuralNetwork input
   public void input() {
     // Geschwindigkeit
-    NN.getInputNGeschwindigkeit().setWert(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -6, 6));
+    NN.setInputNGeschwindigkeit(map(geschwindigkeit.mag(), 0, maxGeschwindigkeit, -6, 6));
     // eigene Energie
-    NN.getInputNEnergie().setWert(map(energie, 0, maxEnergie, -6, 6));
+    NN.setInputNEnergie(map(energie, 0, maxEnergie, -6, 6));
     // Feldart
     //println("\n\ngetInputNFeldArt");
-    NN.getInputNFeldart().setWert(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
+    NN.setInputNFeldart(map(map.getFeld((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
     // Memory
-    NN.getInputNMemory().setWert(map(memory, 0, 1, -6, 6));
+    NN.setInputNMemory(map(memory, 0, 1, -6, 6));
     // Bias // immer 1
-    NN.getInputNBias().setWert(1);
+    NN.setInputNBias(1);
     // Richtung
-    NN.getInputNRichtung().setWert(map(degrees(geschwindigkeit.heading()), -180, 180, -6, 6));
+    NN.setInputNRichtung(map(degrees(geschwindigkeit.heading()), -180, 180, -6, 6));
 
 
     //// Fuehler 1
     // Richtung Fuehler 
-    NN.getInputNFuehlerRichtung1().setWert(map(fuehler1.getRichtung(), -180, 180, -6, 6));//                                                                  Hier könnte es Probleme mit map geben
+    NN.setInputNFuehlerRichtung1(map(fuehler1.getRichtung(), -180, 180, -6, 6));//                                                                  Hier könnte es Probleme mit map geben
     // Gegnerenergie
     //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
-    NN.getInputNFuehlerGegnerEnergie1().setWert(map(fuehler1.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6));// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
+    NN.setInputNFuehlerGegnerEnergie1(map(fuehler1.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6));// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
     // Feldenergie
     //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
-    NN.getInputNFuehlerFeldEnergie1().setWert(map(fuehler1.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
+    NN.setInputNFuehlerFeldEnergie1(map(fuehler1.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
     // Feldart
-    NN.getInputNFuehlerFeldArt1().setWert(map(fuehler1.getFuehlerFeldArt(), 0, 1, -6, 6));
+    NN.setInputNFuehlerFeldArt1(map(fuehler1.getFuehlerFeldArt(), 0, 1, -6, 6));
 
     //// Fuehler 2
     // Richtung Fuehler
-    NN.getInputNFuehlerRichtung2().setWert(map(fuehler2.getRichtung(), -180, 180, -6, 6)); //                                                                  Hier könnte es Probleme mit map geben
+    NN.setInputNFuehlerRichtung2(map(fuehler2.getRichtung(), -180, 180, -6, 6)); //                                                                  Hier könnte es Probleme mit map geben
     // Gegnerenergie
     //float[] gegnerEnergie2 = fuehler2.getFuehlerGegnerEnergie();
-    NN.getInputNFuehlerGegnerEnergie2().setWert(map(fuehler2.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6)); // maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
+    NN.setInputNFuehlerGegnerEnergie2(map(fuehler2.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6)); // maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
     // Feldenergie
     //float[] feldEnergie2 = fuehler2.getFuehlerFeldEnergie();
-    NN.getInputNFuehlerFeldEnergie2().setWert(map(fuehler2.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
+    NN.setInputNFuehlerFeldEnergie2(map(fuehler2.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
     // Feldart
-    NN.getInputNFuehlerFeldArt2().setWert(map(fuehler2.getFuehlerFeldArt(), 0, 1, -6, 6));
+    NN.setInputNFuehlerFeldArt2(map(fuehler2.getFuehlerFeldArt(), 0, 1, -6, 6));
   }
 
   // Bewewgung
@@ -178,7 +178,7 @@ public class Lebewesen {
 
       // im Wasser bewegen sich die Lebewesen langsamer und verbrauchen mehr Energie
       if (!map.getFeld((int)position.x, (int)position.y).isLand()) {
-        position.add(geschwindigkeit.mult(1-wasserreibung));
+        position.add(geschwindigkeit);
         energie -= verbrauchWasserbewegung;
       } else {
         position.add(geschwindigkeit);
@@ -324,12 +324,12 @@ public class Lebewesen {
   }
 
   // mutiert Gewichte
-  public Connection[][] mutieren(Connection[][] cArr) {
-    for (int x=0; x<cArr.length; x++) {
-      for (Connection c : cArr[x]) {
+  public Matrix mutieren(Matrix cArr) {
+    for (int x=0; x<cArr.rows; x++) {
+      for (int y=0; y<cArr.cols; y++) {
         if (random(0, 1)>0.3) {
-          float multiplizierer = random(-mutationsrate, mutationsrate);
-          c.setWeight(c.getWeight()+c.getWeight() * multiplizierer);
+          float multiplikator = random(-mutationsrate, mutationsrate);
+          cArr.set(x,y,cArr.get(x,y)+multiplikator*cArr.get(x,y));
         }
       }
     }
@@ -343,24 +343,15 @@ public class Lebewesen {
     return a;
   }
 
-  public Connection[][] mixConnections(Connection[][] c1, Connection[][] c2) { // nimmt an, dass c1 und c2 gleich gross sind
-
-    // ACHTUNG:
-    // BEI DIESER METHODE WERDEN NUR DIE GEWICHTE VERMISCHT, DA DIE CONNECTIONS IM NN KONSTRUKTOR SOWIESO NEU GEMACHT WERDEN
-    // DAS HEISST DIE CONNECTIONS REFERENZIEREN IMMER NOCH DIE NEURONEN DER ELTERN (liegt an .clone())
-    // ----> NUR FUER ERSTELLEN VON KINDERN VERWENDEN
-
-    Connection[][] mixedConnections = new Connection[c1.length][];
-
+  public Matrix mixMatrix(Matrix c1, Matrix c2) { // nimmt an, dass c1 und c2 gleich gross sind
+    Matrix mixedConnections = new Matrix(c1.rows,c1.cols);
+    mixedConnections.copyM(c1);
     // mixedConnections wird zu Kopie von c1
-    for (int i=0; i<c1.length; i++) {
-      mixedConnections[i] = c1[i].clone();
-    }
     // Gewichte werden vermischt
-    for (int x=0; x<c1.length; x++) {
-      for (int y=0; y<c1[0].length; y++) {
+    for (int x=0; x<c1.rows; x++) {
+      for (int y=0; y<c1.cols; y++) {
         if (random(0, 1) > reproduktionsschwellwert) {
-          mixedConnections[x][y].setWeight(c2[x][y].getWeight());
+          mixedConnections.set(x,y,c2.get(x,y));
         }
       }
     }
