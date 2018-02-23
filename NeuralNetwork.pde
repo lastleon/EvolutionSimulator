@@ -4,6 +4,8 @@ public class NeuralNetwork {
   Matrix w1;
   Matrix hiddenSchicht1;
   Matrix w2;
+  Matrix hiddenSchicht2;
+  Matrix w3;
   Matrix outputSchicht;
 
 
@@ -11,42 +13,58 @@ public class NeuralNetwork {
   private int oSLaenge = 8; // Grund in NN_Planung.txt ersichtlich
 
 
-  NeuralNetwork(int hS1) { // hiddenSchicht1
+  NeuralNetwork(int hS1,int hS2) { // hiddenSchicht1
     // Input Neuronen werden erstellt
+
+
     inputSchicht = new Matrix(iSLaenge, 1);
-    
+
     w1 = new Matrix(hS1, iSLaenge);
     w1.setRandom(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge));
-    
-    hiddenSchicht1 = new Matrix(hS1,1);
+
+    hiddenSchicht1 = new Matrix(hS1, 1);
     // Hidden Neuronen (1 Schicht) werden erstellt
-    w2 = new Matrix(oSLaenge, hS1);
+    w2 = new Matrix(hS2, hS1);
     w2.setRandom(-1/sqrt(hS1), 1/sqrt(hS1));
-    
-    outputSchicht = new Matrix(oSLaenge,1);
+
+    hiddenSchicht2 = new Matrix(hS2, 1);
+    // Hidden Neuronen (1 Schicht) werden erstellt
+    w3 = new Matrix(oSLaenge, hS2);
+    w3.setRandom(-1/sqrt(hS2), 1/sqrt(hS2));
+
+    outputSchicht = new Matrix(oSLaenge, 1);
   }
 
 
-  NeuralNetwork(int hS1, Matrix c1, Matrix c2) { // hiddenSchicht1
+  NeuralNetwork(int hS1,int hS2, Matrix c1, Matrix c2,Matrix c3) { // hiddenSchicht1
     // Input Neuronen werden erstellt
-    inputSchicht = new Matrix(iSLaenge, 1);
+
     
+    inputSchicht = new Matrix(iSLaenge, 1);
+
     w1 = new Matrix(hS1, iSLaenge);
     w1.set(c1.m);
-    
-    hiddenSchicht1 = new Matrix(hS1,1);
+
+    hiddenSchicht1 = new Matrix(hS1, 1);
     // Hidden Neuronen (1 Schicht) werden erstellt
-    w2 = new Matrix(oSLaenge, hS1);
+    w2 = new Matrix(hS2, hS1);
     w2.set(c2.m);
     
-    outputSchicht = new Matrix(oSLaenge,1);
+    hiddenSchicht2 = new Matrix(hS2, 1);
+    // Hidden Neuronen (1 Schicht) werden erstellt
+    w3 = new Matrix(oSLaenge, hS2);
+    w3.set(c3.m);
+
+    outputSchicht = new Matrix(oSLaenge, 1);
   }
 
 
   public void update() {
-    hiddenSchicht1.mult(inputSchicht,w1);
+    hiddenSchicht1.mult(inputSchicht, w1);
     hiddenSchicht1.sigmoid();
-    outputSchicht.mult(hiddenSchicht1,w2);
+    hiddenSchicht2.mult(hiddenSchicht1, w2);
+    hiddenSchicht2.sigmoid();
+    outputSchicht.mult(hiddenSchicht2, w3);  
     outputSchicht.sigmoid();
   }
 
@@ -72,35 +90,18 @@ public class NeuralNetwork {
   }
   ////Fuehler
 
-  // 1. Fuehler
-  public void setInputNFuehlerRichtung1(float v) {
-    inputSchicht.set(6, 0, v);
+  public void setInputNFuehlerRichtung(float v, int i) {
+    inputSchicht.set(6 + (i*4), 0, v);
   }
-  public void setInputNFuehlerGegnerEnergie1(float v) {
-    inputSchicht.set(7, 0, v);
+  public void setInputNFuehlerGegnerEnergie(float v, int i) {
+    inputSchicht.set(7+ (i*4), 0, v);
   }
-  public void setInputNFuehlerFeldEnergie1(float v) {
-    inputSchicht.set(8, 0, v);
+  public void setInputNFuehlerFeldEnergie(float v, int i) {
+    inputSchicht.set(8+ (i*4), 0, v);
   }
-  public void setInputNFuehlerFeldArt1(float v) {
-    inputSchicht.set(9, 0, v);
+  public void setInputNFuehlerFeldArt(float v, int i) {
+    inputSchicht.set(9 + (i*4), 0, v);
   }
-
-  // 2. Fuehler
-
-  public void setInputNFuehlerRichtung2(float v) {
-    inputSchicht.set(10, 0, v);
-  }
-  public void setInputNFuehlerGegnerEnergie2(float v) {
-    inputSchicht.set(11, 0, v);
-  }
-  public void setInputNFuehlerFeldEnergie2(float v) {
-    inputSchicht.set(12, 0, v);
-  }
-  public void setInputNFuehlerFeldArt2(float v) {
-    inputSchicht.set(13, 0, v);
-  }
-
 
   // OutputNeuronen
   public float getGeschwindigkeit(Lebewesen lw) {
@@ -112,24 +113,24 @@ public class NeuralNetwork {
   public float getMemory() {
     return outputSchicht.get(2, 0);
   }
-  // Fuehler
-  public float getRotationFuehler1() {
-    return map(outputSchicht.get(3, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
-  }
-  public float getRotationFuehler2() {
-    return map(outputSchicht.get(4, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
-  }
+
 
 
   public float getFresswille() {
-    return outputSchicht.get(5, 0);
+    return outputSchicht.get(3, 0);
   }
   public float getGeburtwille() {
-    return outputSchicht.get(6, 0);
+    return outputSchicht.get(4, 0);
   }
 
   public float getAngriffswille() {
-    return outputSchicht.get(7, 0);
+    return outputSchicht.get(5, 0);
+  }
+
+  // Fuehler
+
+  public float getRotationFuehler(int i) {
+    return map(outputSchicht.get(6+i, 0), 0, 1, -Lebewesen.maxRotationswinkelFuehler/2, Lebewesen.maxRotationswinkelFuehler/2);
   }
 
   // andere getter
@@ -138,5 +139,8 @@ public class NeuralNetwork {
   }
   public Matrix getConnections2() {
     return w2;
+  }
+  public Matrix getConnections3() {
+    return w3;
   }
 }

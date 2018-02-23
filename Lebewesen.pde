@@ -15,7 +15,7 @@ public class Lebewesen {
   private float maxEnergie = 2000.0; 
   private color fellFarbe;
   private float verbrauchBewegung = 3;
-  private float verbrauchWasserbewegung = 2;
+  private float verbrauchWasserbewegung = 5;
   private float wasserreibung = 0.1;
   private float energieverbrauch = 2;
   private boolean lebend = true;
@@ -29,14 +29,15 @@ public class Lebewesen {
   private boolean rot = false;
   private float rotzeit = 0;
   private int generation;
+  private int fuehlerZahl;
+  private int maxFuehlerZahl = 5;
   
   private int id;
 
 
   private double alter = 0;
 
-  private Fuehler fuehler1;
-  private Fuehler fuehler2;
+  private Fuehler[] fuehler;
 
   private NeuralNetwork NN;
   private float memory = 1; // GEN
@@ -46,27 +47,31 @@ public class Lebewesen {
   Lebewesen(int x, int y, float fB, int ID) {
     id = ID;
     durchmesser = fB*1.5;
+    fuehlerZahl = 2;
     
     generation = 0;
 
-    NN = new NeuralNetwork(15);
+    NN = new NeuralNetwork(15,15);
 
     geschwindigkeit = new PVector(maxGeschwindigkeit, maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
 
     position = new PVector(x, y);
-
-    fuehler1 = new Fuehler(this);
-    fuehler2 = new Fuehler(this);
-
+    
+    fuehler = new Fuehler[fuehlerZahl];
+    for(int i = 0; i<fuehlerZahl;i++){
+      fuehler[i] = new Fuehler(this);
+    }
+        
     fellFarbe = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  Lebewesen(int x, int y, Matrix c11, Matrix c12,Matrix c21, Matrix c22, color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
+  Lebewesen(int x, int y, Matrix c11, Matrix c12,Matrix c21, Matrix c22,Matrix c13, Matrix c23,color fellfarbe1, color fellfarbe2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
     id = ID;
     durchmesser = map.getFeldbreite()*1.5;
-
+    fuehlerZahl = 2;
+    
     fressrate = mutieren(mixGenes(f1, f2));
     maxGeschwindigkeit = mutieren(mixGenes(mG1, mG2));
     reproduktionswartezeit = mutieren(mixGenes(r1, r2));
@@ -87,22 +92,27 @@ public class Lebewesen {
     // Connections
     Matrix c1;
     Matrix c2;
+    Matrix c3;
 
     c1 = this.mixMatrix(c11, c21);
     c2 = this.mixMatrix(c12, c22);
+    c3 = this.mixMatrix(c13, c23);
 
     c1 = mutieren(c1);
     c2 = mutieren(c2);
+    c3 = mutieren(c3);
 
-    NN = new NeuralNetwork(15, c1, c2);
+    NN = new NeuralNetwork(15,15, c1, c2,c3);
 
     geschwindigkeit = new PVector(maxGeschwindigkeit, maxGeschwindigkeit);
     geschwindigkeit.limit(maxGeschwindigkeit);
 
     position = new PVector(x, y);
-
-    fuehler1 = new Fuehler(this);
-    fuehler2 = new Fuehler(this);
+    
+    fuehler = new Fuehler[fuehlerZahl];
+    for(int i = 0; i<fuehlerZahl;i++){
+      fuehler[i] = new Fuehler(this);
+    }
   }
 
   public void drawLebewesen() {
@@ -120,8 +130,9 @@ public class Lebewesen {
     if (rotzeit %4==0) {
       rot = !rot;
     }
-    fuehler1.drawFuehler();
-    fuehler2.drawFuehler();
+    for(Fuehler f : fuehler){
+      f.drawFuehler();
+    }
     richtung.setMag(durchmesser/2);
     ellipse(position.x, position.y, durchmesser , durchmesser );
     line(position.x,position.y,position.x + richtung.x,position.y + richtung .y);
@@ -144,41 +155,32 @@ public class Lebewesen {
     NN.setInputNRichtung(map(degrees(geschwindigkeit.heading()), -180, 180, -6, 6));
 
 
-    //// Fuehler 1
+    //// Fuehler 
+    
+    for(int i = 0 ; i<fuehler.length;i++){
     // Richtung Fuehler 
-    NN.setInputNFuehlerRichtung1(map(fuehler1.getRichtung(), -180, 180, -6, 6));//                                                                  Hier könnte es Probleme mit map geben
+    NN.setInputNFuehlerRichtung(map(fuehler[i].getRichtung(), -180, 180, -6, 6),i);//                                                                  Hier könnte es Probleme mit map geben
     // Gegnerenergie
     //float[] gegnerEnergie1 = fuehler1.getFuehlerGegnerEnergie();
-    NN.setInputNFuehlerGegnerEnergie1(map(fuehler1.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6));// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
+    NN.setInputNFuehlerGegnerEnergie(map(fuehler[i].getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6),i);// maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
     // Feldenergie
     //float[] feldEnergie1 = fuehler1.getFuehlerFeldEnergie();
-    NN.setInputNFuehlerFeldEnergie1(map(fuehler1.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
+    NN.setInputNFuehlerFeldEnergie(map(fuehler[i].getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6),i);
     // Feldart
-    NN.setInputNFuehlerFeldArt1(map(fuehler1.getFuehlerFeldArt(), 0, 1, -6, 6));
-
-    //// Fuehler 2
-    // Richtung Fuehler
-    NN.setInputNFuehlerRichtung2(map(fuehler2.getRichtung(), -180, 180, -6, 6)); //                                                                  Hier könnte es Probleme mit map geben
-    // Gegnerenergie
-    //float[] gegnerEnergie2 = fuehler2.getFuehlerGegnerEnergie();
-    NN.setInputNFuehlerGegnerEnergie2(map(fuehler2.getFuehlerGegnerEnergie(), 0, maxEnergie, -6, 6)); // maxEnergie muss geändert werden, falls die maximale Energie von Tier zu Tier variieren kann
-    // Feldenergie
-    //float[] feldEnergie2 = fuehler2.getFuehlerFeldEnergie();
-    NN.setInputNFuehlerFeldEnergie2(map(fuehler2.getFuehlerFeldEnergie(), 0, Feld.maxEnergiewertAllgemein, -6, 6));
-    // Feldart
-    NN.setInputNFuehlerFeldArt2(map(fuehler2.getFuehlerFeldArt(), 0, 1, -6, 6));
+    NN.setInputNFuehlerFeldArt(map(fuehler[i].getFuehlerFeldArt(), 0, 1, -6, 6),i);
+    } 
   }
 
   // Bewewgung
   public void bewegen(float v, float angle) { // Rotationswinkel in Grad
-    if (energie-verbrauchBewegung*v*0.75>=0 && v<maxGeschwindigkeit && v>=0) { // Bewegungsverbrauch pass sich an momenta n
+    if (v<maxGeschwindigkeit && v>=0) { // Bewegungsverbrauch passt sich an momentane geschwindigkeit an
       energie-=verbrauchBewegung*(v*0.75);
       geschwindigkeit.rotate(radians(angle));
       geschwindigkeit.setMag(v);
 
       // im Wasser bewegen sich die Lebewesen langsamer und verbrauchen mehr Energie
       if (!map.getFeld((int)position.x, (int)position.y).isLand()) {
-        position.add(geschwindigkeit);
+        position.add(geschwindigkeit.mult(1-wasserreibung));
         energie -= verbrauchWasserbewegung;
       } else {
         position.add(geschwindigkeit);
@@ -314,26 +316,30 @@ public class Lebewesen {
   }
 
   // Fuehler 1 rotieren
-  public void fuehlerRotieren1(float angle) {
-    fuehler1.fuehlerRotieren(angle);
+  public void fuehlerRotieren(float angle,int i) {
+    fuehler[i].fuehlerRotieren(angle);
   }
 
   // Fuehler 2 rotieren
-  public void fuehlerRotieren2(float angle) {
-    fuehler2.fuehlerRotieren(angle);
-  }
+  
 
   // mutiert Gewichte
-  public Matrix mutieren(Matrix cArr) {
-    for (int x=0; x<cArr.rows; x++) {
-      for (int y=0; y<cArr.cols; y++) {
+  public Matrix mutieren(Matrix m) {
+    for (int x=0; x<m.rows; x++) {
+      for (int y=0; y<m.cols; y++) {
         if (random(0, 1)>0.3) {
           float multiplikator = random(-mutationsrate, mutationsrate);
-          cArr.set(x,y,cArr.get(x,y)+multiplikator*cArr.get(x,y));
+          float neuerWert = m.get(x,y)+multiplikator*m.get(x,y);
+          if(neuerWert > 1){
+            neuerWert = 1;
+          }else if(neuerWert < 0){
+            neuerWert = 0;
+          }
+          m.set(x,y,neuerWert);
         }
       }
     }
-    return cArr;
+    return m;
   }
   public float mutieren(float x) { // x ist der Wert, der mutiert wird
     float a = x;

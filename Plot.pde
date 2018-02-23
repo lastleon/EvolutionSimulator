@@ -30,7 +30,7 @@ class Plot{
      fill(255,200);
      rect(posX,posY,pWidth,pHeight);
      stroke(0);
-     strokeWeight(2/skalierungsfaktor);
+     strokeWeight(1/skalierungsfaktor);
      
      line(posX+1,posY,posX+1,posY+pHeight);
      line(posX+1,posY+pHeight-1,posX+pWidth,posY+pHeight-1);

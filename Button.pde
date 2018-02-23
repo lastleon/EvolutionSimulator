@@ -39,8 +39,8 @@ class Button {
     posX = map.weltX + X/skalierungsfaktor;
     posY = map.weltY + Y/skalierungsfaktor;
 
-    float rMouseX = mouseX-(xOffsetGesamt*skalierungsfaktor);
-    float rMouseY = mouseY-(yOffsetGesamt*skalierungsfaktor);
+    float rMouseX = (mouseX-(xOffsetGesamt))/skalierungsfaktor;
+    float rMouseY = (mouseY-(yOffsetGesamt))/skalierungsfaktor;
 
     bWidth = (W)/skalierungsfaktor;
     bHeight = (H)/skalierungsfaktor;

@@ -27,16 +27,7 @@ try:
             x.append(make_tuple(i)[0])
             y.append(make_tuple(i)[1])
 
-            try:
-                ID = make_tuple(i)[2]
-                if ID != lastID:
-                    lastID = ID
-                    plt.plot(xCoordinate,yCoordinate, "ro", label=str(ID))
-                    plt.annotate(xy=(xCoordinate,yCoordinate), s=str(ID))
-            except:
-                pass
-                
-            
+              
         plt.plot(x,y)
         plt.xlabel("Jahre")
         plt.ylabel("Alter in Jahren")
