@@ -75,7 +75,12 @@ class Feld {
   public void drawFeld() {
     if (nHoehe>meeresspiegel) {
       fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
-    } else fill(0, 0, map(nHoehe, 0, meeresspiegel, 0, 140));
+    } else {
+      fill(0, 0, map(nHoehe, 0, meeresspiegel, 0, 140));
+      if(energiewert > 0){
+        energiewert = 0;
+      }
+    }
     rect(posX, posY, feldBreite, feldBreite);
   }
 

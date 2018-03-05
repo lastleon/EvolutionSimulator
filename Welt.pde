@@ -20,18 +20,20 @@ public class Welt {
   Lebewesen[] top10 = new Lebewesen[10];
   private int maxGeneration;
 
-  float ueProb = 0.1; 
+  float ueProb = 0.000001; 
   float ueStartD;
   float ueDauer;
   float ueHoehe;
   boolean ueLaufend = false;
   float ueAnstiegProFrame;
+  float ueAbstiegProFrame;
+  float minUeberschwemmungsjahr = 3;
 
   GPointsArray fitness;
   GPointsArray altersschnitt;
   GPointsArray aeltestes;
 
-  float maxUeberschwemmungsdauer = 0.5;
+  float maxUeberschwemmungsdauer = 3;
   
   NNOutput output;
 
@@ -182,7 +184,7 @@ public class Welt {
 
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update() {
-    if(!ueLaufend && jahr > 0.2 && random(0, 1) < ueProb){
+    if(!ueLaufend && jahr > minUeberschwemmungsjahr && random(0, 1) < ueProb){
       ueberschwemmung();
     }
     if(ueLaufend){
@@ -191,16 +193,15 @@ public class Welt {
       if(ueDauer <= 0){
         ueLaufend = false;
         for(Feld f : land){
-          //f.meeresspiegel = stdMeeresspiegel;
-        } 
-      } else if(ueDauer/ueStartD < 0.75){
-        
+          f.meeresspiegel = stdMeeresspiegel;
+        }
+      } else if(ueDauer/ueStartD > 0.25){
         for(Feld f : land){
           f.meeresspiegel += ueAnstiegProFrame;
         } 
       } else {
         for(Feld f : land){
-          f.meeresspiegel -= 3*ueAnstiegProFrame;
+          f.meeresspiegel -= ueAbstiegProFrame;
         }
       }
     }
@@ -353,11 +354,12 @@ public class Welt {
   }
   
   void ueberschwemmung(){
+    println("Überschwemmung!");
     ueLaufend = true;
-    ueDauer = random(0.2, maxUeberschwemmungsdauer);
-    ueHoehe = random(1, 10);
-    ueAnstiegProFrame = (ueDauer/ (float)zeitProFrame)/ueHoehe; // NOCH FALSCH
-    println(ueAnstiegProFrame);
+    ueDauer = random(1, maxUeberschwemmungsdauer);
+    ueHoehe = random(5, 12);
+    ueAnstiegProFrame = ueHoehe/((ueDauer * 0.75)/(float)zeitProFrame);
+    ueAbstiegProFrame = ueHoehe/((ueDauer *0.25)/(float)zeitProFrame);
     ueStartD = ueDauer;
   }
 
