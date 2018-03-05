@@ -10,16 +10,16 @@ class Fuehler{
   Fuehler(Lebewesen l){
     lw = l;
     abstand = lw.getDurchmesser()*1.25;
-    ausrichtung = new PVector(abstand,0);
+    ausrichtung = new PVector(cos(lw.geschwindigkeit.heading())*abstand,sin(lw.geschwindigkeit.heading())*abstand);
     position = new PVector(0,0);
   }
   
   //updated und malt den Fühler
   public void drawFuehler(){
-    
+    abstand = lw.getDurchmesser();
     // Fühlerposition wird erstellt
     position.set(lw.position.x, lw.position.y); //                               lw.position.copy() wurder manchmal null, keine Ahnung wieso
-    ausrichtung.setMag(lw.getDurchmesser() + lw.energie/200);
+    ausrichtung.setMag(lw.getDurchmesser());
     position.add(ausrichtung);
     
     // Fuehler werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
@@ -58,12 +58,16 @@ class Fuehler{
   
   //gibt,wenn Gegner vorhanden, dessen Energie aus // muss effizienter gemacht werden
   public float getFuehlerGegnerEnergie(){ /////////////   aus irgend einem Grund kann position null werden
-    Lebewesen lw = map.getTier((int)position.x,(int)position.y);
+    Lebewesen lw = map.getTier(position);
     if(lw != null){
       return lw.getEnergie();
     } else {
       return 0;
-}
+    }
+  }
+  
+  public Lebewesen getFuehlerPartner(){
+    return map.getTier(position);
   }
   
   public float getRichtung(){

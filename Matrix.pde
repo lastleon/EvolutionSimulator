@@ -44,6 +44,26 @@ class Matrix {
     }
   }
   
+  void printMatrix(){
+    print("[");
+    for(int x=0; x<this.rows; x++){
+      if(!(x==0)){
+        print(" [");
+      } else {
+        print("[");
+      }
+      for(int y=0; y<this.cols; y++){
+        print(" " + m[x][y] + " ");
+      }
+      if(!(x==this.rows-1)){
+        println("]");
+      } else {
+        print("]");
+      }
+    }
+    println("]");
+  }
+  
   void copyM(Matrix m2){
     for (int x = 0; x < rows; x++) {
       for (int y = 0; y < cols; y++) {

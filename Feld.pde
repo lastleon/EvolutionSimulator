@@ -8,7 +8,7 @@ class Feld {
   private float energiewert = 0;
   private float maxEnergiewert;
   private float feldBreite;
-  private float maxRegenerationsrate = maxEnergiewertAllgemein/250;
+  private float maxRegenerationsrate = maxEnergiewertAllgemein/1000;
   private float[] bewachsen;
   private boolean beeinflussbar;
 
@@ -17,7 +17,7 @@ class Feld {
 
   
 
-  private int meeresspiegel = 45;
+  private float meeresspiegel = Welt.stdMeeresspiegel;
 
   Feld(float x, float y, float h, float fB, int aX, int aY) {
     posX = x;
@@ -45,7 +45,7 @@ class Feld {
      energiewert = maxEnergiewert;
      }
      */
-    if (beeinflussbar) {
+    if (beeinflussbar && nHoehe>meeresspiegel) {
       float rest = maxRegenerationsrate - regenerationsrate;
       bewachsen = sort(bewachsen);
       for (int i = 3; i >= 0; i--) { 
@@ -56,7 +56,7 @@ class Feld {
       }
     }
     
-    regenerationsrate *= meeresspiegel+20/nHoehe;
+    regenerationsrate *= Welt.stdMeeresspiegel+20/nHoehe;
     if (regenerationsrate>maxRegenerationsrate)regenerationsrate = maxRegenerationsrate;
     
     energiewert += regenerationsrate;
@@ -64,9 +64,7 @@ class Feld {
   }
 
   public boolean isLand() {
-    if (nHoehe>meeresspiegel) {
-      return true;
-    } else return false;
+     return nHoehe>meeresspiegel;
   }
   public int isLandInt() {
     if (nHoehe>meeresspiegel) {
@@ -77,7 +75,7 @@ class Feld {
   public void drawFeld() {
     if (nHoehe>meeresspiegel) {
       fill(map(energiewert, 0, maxEnergiewert, 255, 80), map(energiewert, 0, maxEnergiewert, 210, 140), 20); //muss noch geändert werden
-    } else fill(0, 0, map(nHoehe, 0, 45, 0, 140));
+    } else fill(0, 0, map(nHoehe, 0, meeresspiegel, 0, 140));
     rect(posX, posY, feldBreite, feldBreite);
   }
 

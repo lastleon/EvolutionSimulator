@@ -16,49 +16,58 @@ public class Welt {
   private int geburtenProJahr;
   private int todeProJahr;
   private int geburten = 0;
-  Plot fitness;
-  Plot altersschnitt;
-  Plot aeltestes;
-  Button bFitness;
-  Button bAltersschnitt;
-  Button bAeltestes;
-  Button keiner;
+  private float fitnessMaximum = 1; // arbitrary value 
+  Lebewesen[] top10 = new Lebewesen[10];
+  private int maxGeneration;
 
-  String graph = "keiner";
+  float ueProb = 0.1; 
+  float ueStartD;
+  float ueDauer;
+  float ueHoehe;
+  boolean ueLaufend = false;
+  float ueAnstiegProFrame;
 
+  GPointsArray fitness;
+  GPointsArray altersschnitt;
+  GPointsArray aeltestes;
 
+  float maxUeberschwemmungsdauer = 0.5;
+  
+  NNOutput output;
+
+  PrintWriter outputWriter;
 
   // Tiere: Standard Werte
-  final public static float stdFressrate = 20;
+  final public static float stdFressrate = 22;
   final public static float stdMaxGeschwindigkeit = 2;
-  final public static float stdAngriffswert = 20;
-  final public static float stdReproduktionswartezeit = 0.25;
+  final public static float stdAngriffswert = 17;
+  final public static float stdReproduktionswartezeit = 0.2;
   float stdDurchmesser;
+  
+  // Welt: Standard Werte
+  final public static float stdMeeresspiegel = 43;
 
 
   public Welt(int weltG, int lw) {
 
+    output = new NNOutput();
+
     jahr = 0;
     lwZahl = lw;
     weltGroesse = weltG;
-    //plots
-    fitness = new Plot(0, 250, 200, 200);
-    altersschnitt = new Plot(0, 250, 200, 200);
-    aeltestes = new Plot(0, 250, 200, 200);
-    fitness.addValues(0, 0);
-    altersschnitt.addValues(0, 0);
-    aeltestes.addValues(0, 0);
 
-    //Buttons Interface: x:200, y: 250
-    bFitness = new Button(0, 50, 100, 50, "DurchschnittsFitness");
-    bAltersschnitt = new Button(100, 50, 100, 50, "DurchschnittsAlter");
-    bAeltestes = new Button(0, 100, 100, 50, "AeltestesAlter");
-    keiner = new Button(100, 100, 100, 50, "kein Graph");
+    // Arrays for plots
+    fitness = new GPointsArray();
 
+    altersschnitt = new GPointsArray();
+    altersschnitt.add(0, 0);
+
+    aeltestes = new GPointsArray();
+    aeltestes.add(0, 0);
 
     // skaliert die Feldbreite and die Fenstergroesse und die Feldanzahl pro Reihe
     fB = fensterGroesse/weltGroesse;
-    stdDurchmesser = fB * 1.5;
+    stdDurchmesser = fB * 1.25;
 
     // generiert Welt
     welt = new Feld[weltGroesse][weltGroesse];
@@ -94,11 +103,16 @@ public class Welt {
 
       bewohner.add(new Lebewesen(posX, posY, fB, currentID));
       currentID++;
+
+      if (i<10) {
+        top10[i] = bewohner.get(i);
+        top10[i].inTop10 = true;
+      }
     }
   }
 
   // entfernt Tote
-  public void todUndGeburt() {
+  public void geburt() {
     ArrayList<Lebewesen> bewohnerCopy = new ArrayList<Lebewesen>(bewohner);
     for (Lebewesen lw1 : bewohnerCopy) {
       for (Lebewesen lw2 : bewohnerCopy) {
@@ -115,7 +129,7 @@ public class Welt {
   }
 
   public void gebaeren(Lebewesen lw1, Lebewesen lw2) {
-    if ((lw1.NN.getGeburtwille()*lw1.calculateFitnessStandard() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille()*lw2.calculateFitnessStandard() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen
+    if ((lw1.NN.getGeburtwille() > Lebewesen.reproduktionswille && lw2.NN.getGeburtwille() > Lebewesen.reproduktionswille) //Beide LW muessen zustimmen
       &&
       (lw1.getEnergie() >= Lebewesen.geburtsenergie && lw2.getEnergie() >= Lebewesen.geburtsenergie) // Beide LW muessen genug Energie haben
       &&
@@ -135,15 +149,13 @@ public class Welt {
       println("geburt" + geburten);
       // Neues Lebewesen mit gemischten Connections entsteht
       this.addLebewesen(
-        new Lebewesen((int)(posLw1.x + cos(PVector.angleBetween(posLw1, 
-        posLw2))*(lw1.getDurchmesser()/2)), 
+        new Lebewesen(
+        (int)(posLw1.x + cos(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
         (int)(posLw1.y + sin(PVector.angleBetween(posLw1, posLw2))*(lw1.getDurchmesser()/2)), 
         lw1.NN.getConnections1(), 
         lw1.NN.getConnections2(), 
         lw2.NN.getConnections1(), 
         lw2.NN.getConnections2(), 
-        lw1.NN.getConnections3(), 
-        lw2.NN.getConnections3(), 
         lw1.getFellfarbe(), 
         lw2.getFellfarbe(), 
         max(lw1.getGeneration(), lw2.getGeneration()), 
@@ -170,6 +182,28 @@ public class Welt {
 
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update() {
+    if(!ueLaufend && jahr > 0.2 && random(0, 1) < ueProb){
+      ueberschwemmung();
+    }
+    if(ueLaufend){
+      //println(ueAnstiegProFrame);
+      ueDauer -= (float)zeitProFrame;
+      if(ueDauer <= 0){
+        ueLaufend = false;
+        for(Feld f : land){
+          //f.meeresspiegel = stdMeeresspiegel;
+        } 
+      } else if(ueDauer/ueStartD < 0.75){
+        
+        for(Feld f : land){
+          f.meeresspiegel += ueAnstiegProFrame;
+        } 
+      } else {
+        for(Feld f : land){
+          f.meeresspiegel -= 3*ueAnstiegProFrame;
+        }
+      }
+    }
     translate(xOffsetGesamt+xOffset, yOffsetGesamt+yOffset);
     scale(skalierungsfaktor);
     background(0, 128, 255);
@@ -195,8 +229,13 @@ public class Welt {
     gesamtAlter = 0;
     gesamtFitness = 0;
 
+
+    //println("AAA " + this.calculateFitnessMaximum() + " " + fitnessMaximum);
+
     for (int i = bewohner.size()-1; i>=0; i--) {
+
       Lebewesen lw = bewohner.get(i);
+
       lw.input();
       lw.NN.update();
       lw.leben();
@@ -205,20 +244,35 @@ public class Welt {
       lw.fressen(lw.NN.getFresswille());
       lw.erinnern(lw.NN.getMemory());
       //lw.fellfarbeAendern(lw.NN.getFellRot(), lw.NN.getFellGruen(), lw.NN.getFellBlau());
-      for (int j = 0; j < lw.fuehlerZahl; j++) {
-        lw.fuehlerRotieren(lw.NN.getRotationFuehler(j)+  lw.NN.getRotation(), j);
-      }
       lw.angriff(lw.NN.getAngriffswille()); // hilft, Bevoelkerung nicht zu gross zu halten
 
       gesamtAlter += lw.getAlter();
       gesamtFitness += lw.calculateFitnessStandard(); // funktioniert nur bei Standardfitness
       if (!lw.getStatus()) {
+        if (lw.inTop10) {
+          while (true) {
+            int index = int (random(0, bewohner.size()));
+            if (!bewohner.get(index).inTop10) {
+              top10[findInTop10(lw)] = bewohner.get(index);
+              bewohner.get(index).inTop10 = true;
+              break;
+            }
+          }
+        }
         bewohner.remove(bewohner.indexOf(lw));
         todeProJahr++;
+        continue;
       }
+      output.addValue((int)(lw.NN.getRotationPur()*10000));
+
+      lw.updateFitness();
     }
 
-    todUndGeburt();
+    fitnessMaximum = this.calculateFitnessMaximum();
+
+    geburt();
+
+    //println("CCC " + fitnessMaximum + " " + fitnessMaximum);
 
     if (frameCount > 1) {
       felderBewachsen();
@@ -232,6 +286,14 @@ public class Welt {
     jahr += zeitProFrame;
     float neuesJahr = (float)(jahr * multiplikator);
     jahr = (double)floor(neuesJahr) / multiplikator;
+    if (jahr != 0 && jahr/((int)jahr) == 1) {
+      println("Max Generation: " + maxGeneration);
+    }
+    if (jahr != 0 && jahr/((int)jahr) == 10) {
+      fitness.remove(0);
+      altersschnitt.remove(0);
+      aeltestes.remove(0);
+    }
     if (save) {
       if ((jahr*100)%1 == 0) {
         double aeltestesLwAlter = 0;
@@ -242,9 +304,18 @@ public class Welt {
             aeltestesLwID = lw.getID();
           }
         }
-        fitness.addValues((float)jahr, (float)gesamtFitness/bewohner.size());
-        aeltestes.addValues((float)jahr, (float)aeltestesLwAlter);
-        altersschnitt.addValues((float)jahr, (float)gesamtAlter/bewohner.size());
+        fitness.add((float)jahr, (float)gesamtFitness/bewohner.size());
+        aeltestes.add((float)jahr, (float)aeltestesLwAlter);
+        altersschnitt.add((float)jahr, (float)gesamtAlter/bewohner.size());
+        
+        if(selectedButton == ButtonType.FITNESS){
+          plot.addPoint((float)jahr, (float)gesamtFitness/bewohner.size());
+        } else if(selectedButton == ButtonType.AELTESTES){
+          plot.addPoint((float)jahr, (float)aeltestesLwAlter);
+        } else if(selectedButton == ButtonType.ALTERSSCHNITT){
+          plot.addPoint((float)jahr, (float)gesamtAlter/bewohner.size());
+        }
+        
         output1.print("(" + jahr + "," + aeltestesLwAlter + "," + aeltestesLwID + ");");
         output1.flush();
         output2.print("(" + jahr + "," + gesamtAlter/bewohner.size() + ");");
@@ -264,34 +335,78 @@ public class Welt {
 
     showWelt();
     showLebewesen();
-    showInterface();
-    if (graph == "fitness")fitness.show();
-    if (graph == "aeltestes")aeltestes.show();
-    if (graph == "schnitt")altersschnitt.show();
+
   }
   // Lebewesen hinzufügen
   public void addLebewesen(Lebewesen lw) {
     bewohner.add(lw);
   }
 
-  // Interface
-  public void showInterface() {
+  void saveOutput() {
+    outputWriter = createWriter(sketchPath("/NNOutput/"+(int)jahr+".txt"));
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<output.deviation.length; i++) {
+      sb.append("("+i+","+output.deviation[i]+");");
+    }
+    outputWriter.print(sb.toString());
+    output = new NNOutput();
+  }
+  
+  void ueberschwemmung(){
+    ueLaufend = true;
+    ueDauer = random(0.2, maxUeberschwemmungsdauer);
+    ueHoehe = random(1, 10);
+    ueAnstiegProFrame = (ueDauer/ (float)zeitProFrame)/ueHoehe; // NOCH FALSCH
+    println(ueAnstiegProFrame);
+    ueStartD = ueDauer;
+  }
 
-    String jahre = "Jahre: " + jahr;
-    fill(50, 200);
-    rect(weltX, weltY, 200/skalierungsfaktor, 150/skalierungsfaktor);
+  float calculateFitnessMaximum() {
+    float maxFitness=0;
+    int tempMaxGeneration = 0;
+    for (Lebewesen lw : bewohner) {
+      if (lw.fitness > maxFitness) {
+        maxFitness = lw.fitness;
+      }
+      if (lw.generation > tempMaxGeneration) {
+        tempMaxGeneration = lw.generation;
+      }
+      addTop10(lw);
+    }
+    maxGeneration = tempMaxGeneration;
+    if (maxFitness != 0) {
+      return maxFitness;
+    } else return 0.001;
+  }
 
-    fill(255);
-    textSize(17/skalierungsfaktor);
-    textAlign(LEFT);
-    text(jahre, weltX + spacing, weltY + spacing);
+  void addTop10(Lebewesen lw) {
+    int index = 0;
+    boolean replaced = false;
+    for (int i=0; i<10; i++) {
+      if (top10[i] == lw) {
+        return;
+      }
+    }
+    for (int i=0; i<10; i++) {
+      if (top10[i].fitness < lw.fitness && top10[index].fitness > top10[i].fitness) {
+        index = i;
+        replaced = true;
+      }
+    }
+    if (replaced) {
+      top10[index].inTop10 = false;
+      top10[index] = lw;
+      lw.inTop10 = true;
+    }
+  }
 
-    text("Bewohner: " + bewohner.size(), weltX + spacing, weltY + spacing*2);
-
-    bFitness.show();
-    bAltersschnitt.show();
-    bAeltestes.show();
-    keiner.show();
+  Integer findInTop10(Lebewesen lw) {
+    for (int i = 0; i<10; i++) {
+      if (top10[i] == lw) {
+        return i;
+      }
+    }
+    return null;
   }
 
   // zeichnet die Welt
@@ -371,9 +486,10 @@ public class Welt {
     }
   }
 
-  public Lebewesen getTier(int x, int y) {
+  public Lebewesen getTier(PVector v) {
+
     for (Lebewesen lw : bewohner) {
-      if (sqrt(sq(lw.position.x- x) + sq(lw.position.y- y)) < lw.durchmesser/2) {
+      if (v.dist(lw.position) < lw.durchmesser/2) {
         return lw;
       }
     }
