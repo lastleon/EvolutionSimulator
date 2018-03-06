@@ -11,6 +11,7 @@ class Matrix {
   }
 
   void mult(Matrix m1,Matrix m2) {
+    assert(m2.cols == m1.rows);
     for (int x = 0; x < m2.rows; x++) {
       for (int y = 0; y < m1.cols; y++) {
         set(x, y, mult(m2.getRow(x), m1.getCol(y)));
@@ -85,7 +86,7 @@ class Matrix {
   void sigmoid() {
     for (int x = 0; x < rows; x++) {
       for (int y = 0; y < cols; y++) {
-        m[x][y] = AktivierungsFunktion.sigmoid(m[x][y]);
+        m[x][y] = Activationfunction.sigmoid(m[x][y]);
       }
     }
   }

@@ -1,129 +1,162 @@
 public class NeuralNetwork {
 
-  Matrix inputSchicht;
-  Matrix w1;
-  Matrix hiddenSchicht1;
-  Matrix w2;
-  Matrix outputSchicht;
+  Matrix inputLayer;
+  Matrix outputLayer;
+  
+  Matrix[] weights;
+  Matrix[] hiddenLayer;
 
 
-  private int iSLaenge = 10; // Grund in NN_Planung.txt ersichtlich
-  private int oSLaenge = 6; // Grund in NN_Planung.txt ersichtlich
+  int iLLength = 10; // Grund in NN_Planung.txt ersichtlich
+  int oLLength = 6; // Grund in NN_Planung.txt ersichtlich
+  int hLAmount;
 
 
-  NeuralNetwork(int hS1) { // hiddenSchicht1
-    // Input Neuronen werden erstellt
-
-
-    inputSchicht = new Matrix(iSLaenge, 1);
-
-    w1 = new Matrix(hS1, iSLaenge);
-    w1.setRandom(-1/sqrt(iSLaenge), 1/sqrt(iSLaenge));
-
-    hiddenSchicht1 = new Matrix(hS1, 1);
-    // Hidden Neuronen (1 Schicht) werden erstellt
-    w2 = new Matrix(oSLaenge, hS1);
-    w2.setRandom(-1/sqrt(hS1), 1/sqrt(hS1));
-
-    outputSchicht = new Matrix(oSLaenge, 1);
+  NeuralNetwork(int hLLength, int hLAmount) { // hiddenSchicht1
+    
+    this.hLAmount = hLAmount;
+    
+    weights = new Matrix[hLAmount+1];
+    hiddenLayer = new Matrix[hLAmount];
+    
+    // InputSchicht wird erstellt
+    inputLayer = new Matrix(iLLength, 1);
+    
+    // weights werden erstellt
+    for(int i=0; i<hLAmount+1; i++){
+      if(i==0){
+        weights[i] = new Matrix(hLLength, iLLength);
+        weights[i].setRandom(-1/sqrt(iLLength), 1/sqrt(iLLength));
+      } else if(i==hLAmount){
+        weights[i] = new Matrix(oLLength, hLLength);
+        weights[i].setRandom(-1/sqrt(oLLength), 1/sqrt(oLLength));
+      } else {
+        weights[i] = new Matrix(hLLength, hLLength);
+        weights[i].setRandom(-1/sqrt(hLLength), 1/sqrt(hLLength));
+      }
+    }
+    
+    // HiddenSchichten werden erstellt
+    for(int i=0; i<hLAmount; i++){
+      hiddenLayer[i] = new Matrix(hLLength, 1);      
+    }
+    
+    // OutputSchicht wird erstellt
+    outputLayer = new Matrix(oLLength, 1);
   }
 
 
-  NeuralNetwork(int hS1, Matrix c1, Matrix c2) { // hiddenSchicht1
-    // Input Neuronen werden erstellt
-
+  NeuralNetwork(int hLLength, Matrix[] w) { // hiddenSchicht1
     
-    inputSchicht = new Matrix(iSLaenge, 1);
+    hLAmount = w.length-1;
+    
+    weights = new Matrix[hLAmount+1];
+    hiddenLayer = new Matrix[hLAmount];
+    
+    // InputSchicht wird erstellt
+    inputLayer = new Matrix(iLLength, 1);
 
-    w1 = new Matrix(hS1, iSLaenge);
-    w1.set(c1.m);
+    // weights werden erstellt
+    for(int i=0; i<hLAmount+1; i++){
+      if(i==0){
+        weights[i] = new Matrix(hLLength, iLLength);
+        weights[i].set(w[i].m);
+      } else if(i==hLAmount){
+        weights[i] = new Matrix(oLLength, hLLength);
+        weights[i].set(w[i].m);
+      } else {
+        weights[i] = new Matrix(hLLength, hLLength);
+        weights[i].set(w[i].m);
+      }
+    }
+    
+    // HiddenSchichten werden erstellt
+    for(int i=0; i<hLAmount; i++){
+      hiddenLayer[i] = new Matrix(hLLength, 1);      
+    }
 
-    hiddenSchicht1 = new Matrix(hS1, 1);
-    // Hidden Neuronen (1 Schicht) werden erstellt
-    w2 = new Matrix(oSLaenge, hS1);
-    w2.set(c2.m);
-
-    outputSchicht = new Matrix(oSLaenge, 1);
+    outputLayer = new Matrix(oLLength, 1);
   }
 
 
   public void update() {
-    hiddenSchicht1.mult(inputSchicht, w1);
-    hiddenSchicht1.sigmoid();
-    outputSchicht.mult(hiddenSchicht1, w2);  
-    outputSchicht.sigmoid();
+    for(int i=0; i<hLAmount; i++){
+      if(i==0){
+        hiddenLayer[i].mult(inputLayer, weights[i]);
+        hiddenLayer[i].sigmoid();
+      } else {
+        hiddenLayer[i].mult(hiddenLayer[i-1], weights[i]);
+        hiddenLayer[i].sigmoid();
+      }
+    }
+    outputLayer.mult(hiddenLayer[hLAmount-1], weights[hLAmount]);  
+    outputLayer.sigmoid();
   }
 
   //// getter
   // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
-  public void setInputNGeschwindigkeit(float v) {
-    inputSchicht.set(0, 0, v);
+  public void setInputNVelocity(float v) {
+    inputLayer.set(0, 0, v);
   }
-  public void setInputNEnergie(float v) {
-    inputSchicht.set(1, 0, v);
+  public void setInputNEnergy(float v) {
+    inputLayer.set(1, 0, v);
   }
-  public void setInputNFeldart(float v) {
-    inputSchicht.set(2, 0, v);
+  public void setInputNFieldType(float v) {
+    inputLayer.set(2, 0, v);
   }
   public void setInputNMemory(float v) {
-    inputSchicht.set(3, 0, v);
+    inputLayer.set(3, 0, v);
   }
   public void setInputNBias(float v) {
-    inputSchicht.set(4, 0, v);
+    inputLayer.set(4, 0, v);
   }
-  public void setInputNRichtung(float v) {
-    inputSchicht.set(5, 0, v);
+  public void setInputNDirection(float v) {
+    inputLayer.set(5, 0, v);
   }
   
-  ////Fuehler
+  ////Sensor
 
-  public void setInputNFuehlerGegnerEnergie(float v) {
-    inputSchicht.set(6, 0, v);
+  public void setInputNSensorEnemyEnergy(float v) {
+    inputLayer.set(6, 0, v);
   }
-  public void setInputNFuehlerFeldEnergie(float v) {
-    inputSchicht.set(7, 0, v);
+  public void setInputNSensorFieldEnergy(float v) {
+    inputLayer.set(7, 0, v);
   }
-  public void setInputNFuehlerFeldArt(float v) {
-    inputSchicht.set(8, 0, v);
+  public void setInputNSensorFieldType(float v) {
+    inputLayer.set(8, 0, v);
   }
   
   ////Nicht mehr Fühler
   
   public void setInputNPartnerFitness(float v) {
-    inputSchicht.set(9, 0, v);
+    inputLayer.set(9, 0, v);
   }
 
   // OutputNeuronen
-  public float getGeschwindigkeit(Lebewesen lw) {
-    return outputSchicht.get(0, 0) * lw.getMaxGeschwindigkeit();
+  public float getGeschwindigkeit(Creature c) {
+    return outputLayer.get(0, 0) * c.getMaxVelocity();
   }
   public float getRotation() {
-    return map(outputSchicht.get(1, 0), 0, 1, -Lebewesen.maxRotationswinkelBewegung/2, Lebewesen.maxRotationswinkelBewegung/2); // muss noch sehen, wie die Rotation wirklich laeuft
-  }
-  public float getRotationPur(){
-    return outputSchicht.get(1,0);
+    return map(outputLayer.get(1, 0), 0, 1, -Creature.maxMovementRotationAngle/2, Creature.maxMovementRotationAngle/2); // muss noch sehen, wie die Rotation wirklich laeuft
   }
   public float getMemory() {
-    return outputSchicht.get(2, 0);
+    return outputLayer.get(2, 0);
   }
-  public float getFresswille() {
-    return outputSchicht.get(3, 0);
+  public float getEatingWill() {
+    return outputLayer.get(3, 0);
   }
-  public float getGeburtwille() {
-    return outputSchicht.get(4, 0);
-  }
-
-  public float getAngriffswille() {
-    return outputSchicht.get(5, 0);
+  public float getBirthWill() {
+    return outputLayer.get(4, 0);
   }
 
-  // Fuehler
+  public float getAttackWill() {
+    return outputLayer.get(5, 0);
+  }
+
+  // Sensor
 
   // andere getter
-  public Matrix getConnections1() {
-    return w1;
-  }
-  public Matrix getConnections2() {
-    return w2;
+  public Matrix[] getWeights() {
+    return weights;
   }
 }
