@@ -1,59 +1,71 @@
-
 public class Creature {
-
-  public final static int maxMovementRotationAngle = 20; /////////////////////////////// Version mit veraenderter Mutation
-  public final static int maxSensorRotationAngle = 10;
-
-  PVector velocity;
+  
+  //// Bewegung
+  // Position x & y
   PVector position;
-
-  float mutationRate = 0.4;
-  float diameter; // muss an World skaliert werden
-  float eatingRate = World.stdEatingRate;
-  float maxVelocity = World.stdMaxVelocity; //GEN
-  float energy = 1400.0; // 500
-  float maxEnergy = 4000.0; // 2000
-  color furColour;
+  // Geschwindigkeit in x & y Richtung gespeichert
+  PVector velocity;
+  
+  // Verbrauch Land & Wasser
   float movementConsumption = 3;
-  float movementConsumptionInWater = 5;
+  float additionalMovementConsumptionInWater = 5;
+  // Wasserreibung 
   float waterFriction = 0.1;
-  float energyConsumption = 2;
-  public final static float birthEnergy = 800;
-  float reproductionWaitingPeriod = World.stdReproductionWaitingPeriod;
-  float attackValue = World.stdAttackValue;
-  public final static float reproductionWill = 0.4;
+  
+  //// Gene
+  float eatingRate = World.stdEatingRate; // GEN
+  float maxVelocity = World.stdMaxVelocity; //GEN
+  float attackValue = World.stdAttackValue; // GEN
+  float reproductionWaitingPeriod = World.stdReproductionWaitingPeriod; // GEN
+  
+  //// wichtige Werte für die Kreatur
+  color furColour;
+  float energy = 1400.0;
+  // wird an Welt & Energielevel skaliert
+  float diameter;
   boolean readyToGiveBirth = false;
-  float lastBirth = 0;
-  float reproductionThreshold = 0.5;
-  float mixingThreshold = 0.3;
-  boolean red = false;
-  float redtime = 0;
+  double age = 0;
   int generation;
   
+  //// statische Werte
+  final static float mutationRate = 0.2;
+  final static float maxEnergy = 2500.0;
+  final static float energyConsumption = 2;
+  final static float birthEnergy = 800;
+  final static float reproductionWill = 0.4;
+  final static float reproductionThreshold = 0.5;
+  final static float mixingThreshold = 0.3;
+  public final static int maxMovementRotationAngle = 20; // Grad
+  public final static int maxSensorRotationAngle = 10; // Grad
+  
+  //// Berechnungsvariablen
+  float lastBirth = 0;
+  boolean red = false;
+  float redtime = 0;
+  boolean inTop10 = false;
+  int id;
+  
+  //// Neuronales Netzwerk
+  NeuralNetwork NN;
+  // Hiddenlayerwerte
   int hLAmount = 1;
   int hLLength = 8;
   
-  int id;
-  
-  boolean inTop10 = false;
-  
+  float memory = 1;
   float fitness = 0;
-
-  double age = 0;
-
+  
+  //// Fühler
   Sensor sensor;
-
-  NeuralNetwork NN;
-  float memory = 1; // GEN
-
-
+   
+   
+   
   // sollte bei 1. Generation verwendet werden
   Creature(int x, int y, float fW, int ID) {
     
     id = ID;
     diameter = fW*1.25;
     
-    generation = 0;
+    generation = 1;
 
     NN = new NeuralNetwork(hLLength, hLAmount);
 
@@ -68,28 +80,30 @@ public class Creature {
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
+  //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, r1, r2: Reproduktionswartezeit, a1, a2: Angriffswert
   Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
     
     id = ID;
     diameter = map.getFieldWidth()*1.25;
     
+    // Gene der Eltern werden vermischt & mutiert
     eatingRate = mutate(mixGenes(f1, f2));
     maxVelocity = mutate(mixGenes(mG1, mG2));
     reproductionWaitingPeriod = mutate(mixGenes(r1, r2));
     attackValue = mutate(mixGenes(a1, a2));
 
     generation = g+1;
-    //energy = birthEnergy;
 
-    // furColour wird random aus beiden Elternteilen gewaehlt
+    // furColour wird random aus beiden Elternteilen gewählt
     if(random(0,1)>0.5){
       furColour = furColour1;
     } else {
       furColour = furColour2;
     }
-    
+    // Fellfarbe wird mutiert
     furColour = mutateFurColour(furColour);
-
+    
+    // Gewichtmatrizen der Eltern werden vermischt & mutiert
     NN = new NeuralNetwork(hLLength, mutate(mixMatrix(weights1,weights2)));
 
     velocity = new PVector(maxVelocity, maxVelocity);
@@ -99,13 +113,13 @@ public class Creature {
     
     sensor = new Sensor(this);
   }
-
+  
+  // Kreatur wird gemalt
   public void drawCreature() {
-    PVector direction = new PVector(velocity.x, velocity.y);
-    diameter = map.stdDiameter * energy/4000 + 10 ;
-    if(diameter<0) {
-      diameter = 0;
-    }
+    // Durchmesser an Energielevel angepasst
+    diameter = map.stdDiameter * energy/2000 + 5 ;
+    
+    // nach Angriff blinkt Kreatur 30 Frames rot
     if (redtime == 0) {
       fill(furColour);
     } else if (red) {
@@ -119,8 +133,9 @@ public class Creature {
       red = !red;
     }
     sensor.drawSensor();
-    direction.setMag(diameter/2);
+    // Körper
     ellipse(position.x, position.y, diameter , diameter );
+    // wenn in Top 10, dann werden Werte angezeigt
     if(inTop10){
       textSize(14);
       textAlign(CENTER);
@@ -141,59 +156,55 @@ public class Creature {
 
   // NeuralNetwork input
   public void input() {
+    // Werte werden auf -6 bis 6 gemappt, weil die Sigmoidfunktion so fast alle Werte zwischen 0 und 1 erreichen kann
+    
     // Geschwindigkeit
     NN.setInputNVelocity(map(velocity.mag(), 0, maxVelocity, -6, 6));
-    // eigene Energy
+    // eigene Energie
     NN.setInputNEnergy(map(energy, 0, maxEnergy, -6, 6));
-    // Fieldart
-    //println("\n\ngetInputNFieldType");
+    // Feldart
     NN.setInputNFieldType(map(map.getField((int)position.x, (int)position.y).isLandInt(), 0, 1, -6, 6));
     // Memory
     NN.setInputNMemory(map(memory, 0, 1, -6, 6));
     // Bias // immer 1
     NN.setInputNBias(1);
-    // Direction
+    // Richtung
     NN.setInputNDirection(map(degrees(velocity.heading()), -180, 180, -6, 6));
-    // Mating Partner Fitness
-    Creature partner = sensor.getSensorPartner();
-    if(partner != null){
-      //println(partner.calculateFitnessStandard() + " " + map.calculateFitnessMaximum());
-      //println(partner.fitnessGPoints + " " + map.fitnessGPointsMaximum + " " + partner.fitnessGPoints/map.fitnessGPointsMaximum);
-      //println(partner.fitnessGPoints/map.fitnessGPointsMaximum);
-      NN.setInputNPartnerFitness(map(partner.fitness/map.fitnessMaximum, 0, 1, -6, 6));
+    // Paarungspartner/Gegner Fitness
+    Creature c = sensor.getSensorPartner();
+    if(c != null){
+      NN.setInputNPartnerFitness(map(c.fitness/map.fitnessMaximum, 0, 1, -6, 6));
     } else {
       NN.setInputNPartnerFitness(-6);
     }
 
-    //// Sensor 
+    //// Fühler
     
-    // Enemyenergy
-    //float[] gegnerEnergy1 = sensor1.getSensorEnemyEnergy();
-    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy(), 0, maxEnergy, -6, 6));// maxEnergy muss geändert werden, falls die maximale Energy von Creature zu Creature variieren kann
-    // Fieldenergy
-    //float[] fieldEnergy1 = sensor1.getSensorFieldEnergy();
+    // Gegnerenergie
+    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy(), 0, maxEnergy, -6, 6));
+    // Feldenergie
     NN.setInputNSensorFieldEnergy(map(sensor.getSensorFieldEnergy(), 0, Field.maxOverallEnergy, -6, 6));
-    // Fieldart
+    // Feldart
     NN.setInputNSensorFieldType(map(sensor.getSensorFieldType(), 0, 1, -6, 6));
   }
 
   // Bewewgung
-  public void move(float v, float angle) { // redationswinkel in Grad
-    if (v<maxVelocity && v>=0) { // Bewegungsverbrauch passt sich an momentane velocity an
+  public void move(float v, float angle) { // Rotationswinkel in Grad
+    if (v<maxVelocity && v>=0) { // Bewegungsverbrauch passt sich an momentane Geschwindigkeit an
       energy -= movementConsumption*(v/World.stdMaxVelocity);
       velocity.rotate(radians(angle));
       this.sensor.rotateSensor(angle);
       velocity.setMag(v);
 
-      // im Wasser move sich die Creature langsamer und verbrauchen mehr Energy
+      // im Wasser bewegt sich die Kreatur langsamer und verbraucht mehr Energie
       if (!map.getField((int)position.x, (int)position.y).isLand()) {
         position.add(velocity.mult(1-waterFriction));
-        energy -= movementConsumptionInWater;
+        energy -= additionalMovementConsumptionInWater;
       } else {
         position.add(velocity);
       }
 
-      // Creature werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
+      // Kreatur wird auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map ist
       if (position.x > windowSize) { // wenn zu weit rechts        
         position.set(position.x-windowSize, position.y);
       }
@@ -208,14 +219,15 @@ public class Creature {
       }
     }
   }
-  // Angriff auf Enemy
+  // Angriff auf Gegner
   public void attack(float will) {
     if (will > 0.5) {
       addEnergy(-energyConsumption*(attackValue/World.stdAttackValue));
-      // Opfer nur DIREKT vor dem Creature (d.h. in Geschwindigkeitsdirection) kann angegriffen werden
+      // Opfer nur DIREKT vor dem Kreatur (d.h. in Geschwindigkeitsrichtung) kann angegriffen werden
       PVector victimPosition = new PVector(cos(velocity.heading())*(diameter/2)+position.x, sin(velocity.heading())*(diameter/2)+position.y);
 
       Creature victim = map.getCreature(victimPosition);
+      // verhindert, dass Kreatur sich selbst angreift
       if(victim==this){
         victim = null;
       }
@@ -228,7 +240,7 @@ public class Creature {
           this.addEnergy(victim.getEnergy());
           victim.setEnergy(0);
         }
-        if (energy>maxEnergy) { // Creature-Energy ist über dem Maximum
+        if (energy>maxEnergy) { // Kreatur-Energie ist über dem Maximum
           energy = maxEnergy;
         }
         victim.hit();
@@ -244,11 +256,11 @@ public class Creature {
     redtime = 30;
   }
 
-  // Fitnessfunktion // Fitness wird nur beim Rufen der Methode gerufen
-  public float calculateFitnessStandard() { // berechnet die Fitness des Creaturees im Bezug auf die Standardwerte
+  // Fitnessfunktion
+  public float calculateFitnessStandard() { // berechnet die Fitness der Kreatur im Bezug auf die Standardwerte
     float bias = 0.1;
     float a = log((float)(age+1));
-    float g = log((float)(generation+1))*1.5;
+    float g = log((float)(generation))*1.5;
     float eatingRate = ((this.getEatingRate() - World.stdEatingRate)/World.stdEatingRate)*2;
     float maxV = ((this.getMaxVelocity() - World.stdMaxVelocity)/World.stdMaxVelocity)*2;
     float attack = ((this.getAttackValue() - World.stdAttackValue)/World.stdAttackValue)*2;
@@ -266,15 +278,15 @@ public class Creature {
       Field field = map.getField((int)position.x, (int)position.y);
       float newFieldEnergy = field.getEnergy() - eatingRate;
 
-      if (newFieldEnergy>=0) { // Field hat genug Energy
+      if (newFieldEnergy>=0) { // Feld hat genug Energie
         energy += eatingRate;
         field.setEnergy((int)newFieldEnergy);
-      } else { // Field hat zu wenig Energy
+      } else { // Feld hat zu wenig Energie
         energy += field.getEnergy();
         field.setEnergy(0);
       }
 
-      if (energy>maxEnergy) { // Creature-Energy ist über dem Maximum
+      if (energy>maxEnergy) { // Kreatur-Energie ist über dem Maximum
         field.setEnergy((int)(field.getEnergy()+(energy-maxEnergy)));
         energy = maxEnergy;
       }
@@ -284,6 +296,7 @@ public class Creature {
   public boolean collision(Creature c) {
     return map.creatureDistance(this, c) <= diameter;
   }
+  
   public color mutateFurColour(color furColour) {
 
     float r = red(furColour) + red(furColour) * random(-0.3, 0.3);
@@ -314,8 +327,7 @@ public class Creature {
     for (int x=0; x<m.rows; x++) {
       for (int y=0; y<m.cols; y++) {
         if (random(0, 1)>0.3) {
-          float multiplier = random(-mutationRate, mutationRate);
-          float newValue = m.get(x,y)+multiplier*m.get(x,y);
+          float newValue = mutate(m.get(x,y));
           if(newValue > 1){
             newValue = 1;
           }else if(newValue < 0){
@@ -327,13 +339,15 @@ public class Creature {
     }
     return m;
   }
+  // mutiert einzelnen Wert
   public float mutate(float x) { // x ist der Wert, der mutiert wird
     if (x > 0 && random(0, 1)>0.5) {
-      x += random(-mutationRate, mutationRate)*x/4;
+      x += random(-mutationRate, mutationRate)*((log(x)/log(10))+1);
     }
+    if(x<0) x = 0;
     return x;
   }
-  
+  // mutiert ganze Matrix
   public Matrix[] mutate(Matrix[] m){
     Matrix[] returnMatrix = new Matrix[m.length];
     for(int i=0; i<m.length; i++){
@@ -341,7 +355,7 @@ public class Creature {
     }
     return returnMatrix;
   }
-
+  // vermischt zwei Matrizen
   public Matrix mixMatrix(Matrix c1, Matrix c2) { // nimmt an, dass c1 und c2 gleich gross sind
     Matrix mixedMatrix = new Matrix(c1.rows,c1.cols);
     mixedMatrix.copyM(c1);
@@ -357,6 +371,7 @@ public class Creature {
     return mixedMatrix;
   }
   
+  // vermischt zweit Matrizen-Arrays
   public Matrix[] mixMatrix(Matrix[] m1, Matrix[] m2){
     Matrix[] returnMatrix = new Matrix[m1.length];
     for(int i=0; i<returnMatrix.length; i++){
@@ -364,27 +379,29 @@ public class Creature {
     }
     return returnMatrix;
   }
-
+  
   public float mixGenes(float g1, float g2) {
     if (random(0, 1)>reproductionThreshold) {
       return g1;
     } else return g2;
   }
 
-
   public void age() {
     age += map.getTimePerFrame();
+    
+    // Alter wird gerundet
     float newAge = (float)(age * map.getTimeMultiplier());
     age = (double)floor(newAge) / (double)map.getTimeMultiplier();
 
-    // readyToGiveBirth
+    // check, ob Kreatur geburtsbereit ist
     if (age - lastBirth >= reproductionWaitingPeriod) {
       readyToGiveBirth = true;
     } else {
       readyToGiveBirth = false;
     }
   }
-
+  
+  
   public void memorise(float m) {
     memory = m;
   }

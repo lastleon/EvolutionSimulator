@@ -1,11 +1,17 @@
 class Interface extends PApplet {   //<>//
-
+  
+  // Grafika Library für Plot benutzt
+  // in Video erklärt
+  
   Button[] buttons;
 
   Button bFitness;
   Button bAvgAge;
   Button bOldest;
   Button bFlood;
+  Button bGeneration;
+  
+  Label floodOngoing;
 
   int bg = 230;
 
@@ -14,6 +20,7 @@ class Interface extends PApplet {   //<>//
   int lineSpacing = 5;
 
   Interface() {
+    // zweites Fenster gerufen
     super();
     PApplet.runSketch(new String[] {"LiveData"}, this);
     
@@ -38,8 +45,11 @@ class Interface extends PApplet {   //<>//
     bAvgAge = new Button(0, plotHeight + 50, 100, 50, "Ø Alter", ButtonType.AVGAGE);
     bOldest = new Button(100, plotHeight, 100, 50, "Ältestes Alter", ButtonType.OLDEST);
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
+    bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
 
-    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood}; // order must not be changed
+    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration}; // order must not be changed
+    
+    floodOngoing = new Label(plotWidth+leftSpacing, plotHeight-75, 130, 65, "FLUT", color(255, 46, 46), color(255));
   }
 
   void draw() {
@@ -52,17 +62,17 @@ class Interface extends PApplet {   //<>//
   }
 
   void drawPlot() {
-    plot.beginDraw();
-    plot.drawBackground();
-    plot.drawXAxis();
-    plot.drawYAxis();
-    plot.drawTitle();
-    try {
+    // Exceptions treten ohne ersichtlichen Grund auf, Plot funktioniert weiterhin gut
+    // Liegt an Grafika
+    try{
+      plot.beginDraw();
+      plot.drawBackground();
+      plot.drawXAxis();
+      plot.drawYAxis();
+      plot.drawTitle();
       plot.drawLines();
     } catch (IndexOutOfBoundsException e) {
-      // ka wieso die Exception auftritt, alles funktioniert weiterhin gut
     } catch (NullPointerException e){
-      // ka wieso die Exception auftritt, alles funktioniert weiterhin gut
     } catch(Exception e){
       e.printStackTrace();
     }
@@ -80,7 +90,11 @@ class Interface extends PApplet {   //<>//
     bFitness.show();
     bAvgAge.show();
     bOldest.show();
+    bGeneration.show();
     bFlood.show();
+    if(map.floodOngoing){
+      floodOngoing.show();
+    }
   }
 
   void mousePressed() {
@@ -96,6 +110,10 @@ class Interface extends PApplet {   //<>//
       buttons[selectedButton.ordinal()].selected = false;
       bOldest.selected = true;
       selectedButton = bOldest.type;
+    } else if (bGeneration.isPressed()) {
+      buttons[selectedButton.ordinal()].selected = false;
+      bGeneration.selected = true;
+      selectedButton = bGeneration.type;
     } else if (bFlood.isPressed()) {
       map.flood();
     }
@@ -108,6 +126,9 @@ class Interface extends PApplet {   //<>//
       break;
     case AVGAGE:
       plot.setPoints(map.averageAgeGPoints);
+      break;
+    case GENERATION:
+      plot.setPoints(map.generationGPoints);
       break;
     }
   }
@@ -142,11 +163,11 @@ class Interface extends PApplet {   //<>//
         rectC = color(255);
         textC = color(0);
       } else {
-        rectC = color(0);
+        rectC = color(6,9,46);
         textC = color(255);
       }
       if (this.isPressed()) {
-        rectC = color(210);
+        rectC = color(197,200,229);
         textC = color(0);
       }
 
@@ -162,6 +183,40 @@ class Interface extends PApplet {   //<>//
 
     boolean isPressed() {
       return (mouseX>posX && mouseX<posX + bWidth && mouseY > posY && mouseY < posY + bHeight && mousePressed);
+    }
+  }
+  
+  class Label{
+    float posX;
+    float posY;
+    float bWidth;
+    float bHeight;
+    String name;
+
+    color rectC;
+    color textC;
+
+    Label(float x, float y, float w, float h, String n, color rC, color tC) {   
+      posX = x;
+      posY = y;
+      bWidth = w;
+      bHeight = h;
+      name = n;
+      rectC = rC;
+      textC = tC;
+    }
+
+    void show() {
+      stroke(0);
+
+      fill(rectC);
+      rect(posX, posY, bWidth, bHeight, 10);
+
+      fill(textC);
+      textAlign(CENTER);
+      textSize(20);
+      text(name, posX+bWidth/2, (posY+bHeight/2));
+      noStroke();
     }
   }
 }

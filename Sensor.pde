@@ -18,11 +18,11 @@ class Sensor{
   public void drawSensor(){
     distance = c.getDiameter();
     // Fühlerposition wird erstellt
-    position.set(c.position.x, c.position.y); //                               c.position.copy() wurder manchmal null, keine Ahnung wieso
+    position.set(c.position.x, c.position.y); // c.position.copy() funktioniert manchmal nicht // Position ausgehend von Kreaturenposition gesetzt
     orientation.setMag(c.getDiameter());
     position.add(orientation);
     
-    // Sensor werden auf die gegenüberliegende Seite teleportiert, wenn sie außerhalb der Map sind
+    // Fühler wird auf die gegenüberliegende Seite teleportiert, wenn er außerhalb der Map ist
     if (position.x > windowSize){ // wenn zu weit rechts        
       position.set(position.x-windowSize, position.y);
     }
@@ -36,11 +36,11 @@ class Sensor{
       position.set(position.x, windowSize+position.y); // + position.y, weil es immer ein negativer Wert ist
     }
     
-    // Falls Sensor auf anderer Seite der Map sind, werden die Linien nicht mehr gemalt
+    // Falls Fühler auf anderer Seite der Map sind, werden die Linien nicht mehr gemalt
     if(!(position.dist(c.getPosition()) > distance)){
       line(position.x, position.y, c.position.x, c.position.y);
     }
-    
+    // Körper
     ellipse(position.x, position.y, c.getDiameter()/4, c.getDiameter()/4);
   }
   
@@ -50,14 +50,14 @@ class Sensor{
   
   ////getter
   
-  //gibt die Energy vom field des Fühlers
+  // gibt die Energie vom Feld des Fühlers
   public float getSensorFieldEnergy(){
     Field field = map.getField((int)position.x, (int)position.y);
     return field.getEnergy();
   }
   
-  //gibt,wenn Enemy vorhanden, dessen Energy aus // muss effizienter gemacht werden
-  public float getSensorEnemyEnergy(){ /////////////   aus irgend einem Grund kann position null werden
+  // gibt, wenn Gegner vorhanden, dessen Energie aus
+  public float getSensorEnemyEnergy(){
     Creature c = map.getCreature(position);
     if(c != null){
       return c.getEnergy();

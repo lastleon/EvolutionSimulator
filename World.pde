@@ -1,58 +1,72 @@
 public class World {
-
+  
+  //// Veränderbare Werte
+  // Flutwerte
+  float floodProbability = 0.00005;
+  float firstPossibilityOfFlood = 15;
+  float maxFloodDuration = 3;
+  
+  // Kreatur: Standard Werte
+  final public static float stdEatingRate = 20;
+  final public static float stdMaxVelocity = 2;
+  final public static float stdAttackValue = 60;
+  final public static float stdReproductionWaitingPeriod = 0.2;
+  
+  // Welt: Standard Werte
+  final public static float stdOceanLevel = 45;
+  
+  //// Welt
+  // Welt
   Field[][] world;
-  ArrayList<Creature> population;
   ArrayList<Field> land;
-  int initialPopulationSize;
-  double year;
   float fW;
+  
+  // Population
+  ArrayList<Creature> population;
+  int initialPopulationSize;
+  float stdDiameter;
+  
+  // Zeit
+  double year;
   double timePerFrame = 0.0005;
   int multiplier = 10000;
+  
+  // Statistiken
+  Creature[] top10 = new Creature[10];
   float totalFitness = 0;
+  float fitnessMaximum = 1; // arbitrary value
+  
   float totalAge = 0;
+  
   int birthCountPerYear;
   int deathCountPerYear;
-  float fitnessMaximum = 1; // arbitrary value 
-  Creature[] top10 = new Creature[10];
+  
   int maxGeneration;
-
-  float floodProbability = 0.00005; 
+  
+  //// Flut
   float inititalFloodDuration;
   float floodDuration;
   float floodHeight;
   boolean floodOngoing = false;
   float floodIncreasePerFrame;
   float floodDecreasePerFrame;
-  float firstPossibilityOfFlood = 15;
   
+  //// Plot
   float removePointsFromThisTime = 25;
 
   GPointsArray fitnessGPoints;
   GPointsArray averageAgeGPoints;
   GPointsArray oldestGPoints;
-
-  float maxFloodDuration = 3;
-  
-  PrintWriter outputWriter;
-
-  // Creaturee: Standard Werte
-  final public static float stdEatingRate = 20;
-  final public static float stdMaxVelocity = 2;
-  final public static float stdAttackValue = 20;
-  final public static float stdReproductionWaitingPeriod = 0.2;
-  float stdDiameter;
-
-  // World: Standard Werte
-  final public static float stdOceanLevel = 43;
+  GPointsArray generationGPoints;
 
 
   public World(int worldS, int c) {
-
+    
     year = 0;
     initialPopulationSize = c;
     worldSize = worldS;
 
-    // Arrays for plots
+    // Arrays für Plots
     fitnessGPoints = new GPointsArray();
 
     averageAgeGPoints = new GPointsArray();
@@ -60,12 +74,15 @@ public class World {
 
     oldestGPoints = new GPointsArray();
     oldestGPoints.add(0, 0);
-
-    // skaliert die Fieldbreite and die Fenstergroesse und die Fieldanzahl pro Reihe
+    
+    generationGPoints = new GPointsArray();
+    generationGPoints.add(0,1);
+    
+    // skaliert die Feldbreite an die Fenstergroesse und die Feldanzahl pro Reihe
     fW = windowSize/worldSize;
     stdDiameter = fW * 1.25;
 
-    // generiert World
+    // generiert Welt
     world = new Field[worldSize][worldSize];
     float yNoise = 0.0;
     for (int y=0; y<worldSize; y++) {
@@ -86,7 +103,7 @@ public class World {
       }
     }
 
-    // generiert Anfangs-Creature
+    // generiert Anfangspopulation
     population = new ArrayList<Creature>(c);
     for (int i=0; i<c; i++) {
       int posX;
@@ -99,16 +116,17 @@ public class World {
 
       population.add(new Creature(posX, posY, fW, currentID));
       currentID++;
-
+      
+      // anfangs werden ersten 10 zu Top 10
       if (i<10) {
         top10[i] = population.get(i);
         top10[i].inTop10 = true;
       }
     }
   }
-
-  // entfernt Tote
-  public void birth() {
+  
+  // 
+  public void lookForMatingPartner() {
     ArrayList<Creature> populationCopy = new ArrayList<Creature>(population);
     for (Creature c1 : populationCopy) {
       for (Creature c2 : populationCopy) {
@@ -123,19 +141,18 @@ public class World {
   }
 
   public float creatureDistance(Creature c1, Creature c2) {
-    //return sqrt(abs(c1.getPosition().x - c2.getPosition().x) + abs(c1.getPosition().y - c2.getPosition().y));
     return c1.getPosition().dist(c2.getPosition());
   }
 
   public void mate(Creature c1, Creature c2) {
-    if ((c1.NN.getBirthWill() > Creature.reproductionWill && c2.NN.getBirthWill() > Creature.reproductionWill) //Beide LW muessen zustimmen
+    if ((c1.NN.getBirthWill() > Creature.reproductionWill && c2.NN.getBirthWill() > Creature.reproductionWill) //Beide Kreaturen müssen zustimmen
       &&
-      (c1.getEnergy() >= Creature.birthEnergy && c2.getEnergy() >= Creature.birthEnergy) // Beide LW muessen genug Energy haben
+      (c1.getEnergy() >= Creature.birthEnergy && c2.getEnergy() >= Creature.birthEnergy) // Beide Kreaturen müssen genug Energie haben
       &&
-      (c1.isReadyToGiveBirth() && c2.isReadyToGiveBirth()) // Beide LW muessen readyToGiveBirth sein
+      (c1.isReadyToGiveBirth() && c2.isReadyToGiveBirth()) // Beide Kreaturen müssen geburtsbereit sein
       )
     {
-      // benötigte Geburtsenergy wird abgezogen
+      // benötigte Geburtsenergie wird abgezogen
       c1.addEnergy(-Creature.birthEnergy);
       c2.addEnergy(-Creature.birthEnergy);
 
@@ -143,7 +160,7 @@ public class World {
       PVector posC1 = new PVector(c1.getPosition().x, c1.getPosition().y);
       PVector posC2 = new PVector(c2.getPosition().x, c2.getPosition().y);
 
-      // Neues Creature mit gemischten Connections entsteht
+      // Neue Kreatur mit gemischten Weights & Genen entsteht
       this.addCreature(
         new Creature(
         (int)(posC1.x + cos(PVector.angleBetween(posC1, posC2))*(c1.getDiameter()/2)), 
@@ -176,7 +193,7 @@ public class World {
 
   // update Methode wird immer in draw (Mainloop) gerufen
   public void update() {
-    
+    // Flut
     if (!floodOngoing && year > firstPossibilityOfFlood && random(0, 1) < floodProbability) {
       flood();
     }
@@ -201,28 +218,10 @@ public class World {
     translate(xOffsetTotal+xOffset, yOffsetTotal+yOffset);
     scale(scale);
     background(0, 128, 255);
-    int populationZahl = population.size();
-    if (populationZahl < initialPopulationSize) {
-      for (int i=0; i<initialPopulationSize-populationZahl; i++) {
-        int posX;
-        int posY;
-        do {
-          //println("\n\nfehlende Creature werden hizugefügt");
-          posX = (int)random(0, windowSize);
-          posY = (int)random(0, windowSize);
-        } while (!this.getField(posX, posY).isLand());
-
-        population.add(new Creature(posX, posY, fW, currentID));
-        currentID++;
-      }
-    }
 
     totalAge = 0;
     totalFitness = 0;
-
-
-    //println("AAA " + this.calculateFitnessMaximum() + " " + fitnessGPointsMaximum);
-
+    
     for (int i = population.size()-1; i>=0; i--) {
 
       Creature c = population.get(i);
@@ -234,11 +233,13 @@ public class World {
       c.move(c.NN.getGeschwindigkeit(c), c.NN.getRotation());
       c.eat(c.NN.getEatingWill());
       c.memorise(c.NN.getMemory());
-      c.attack(c.NN.getAttackWill()); // hilft, Bevoelkerung nicht zu gross zu halten
+      c.attack(c.NN.getAttackWill()); // hilft, Bevölkerung nicht zu gross zu halten
 
       totalAge += c.getAge();
-      totalFitness += c.calculateFitnessStandard(); // funktioniert nur bei StandardfitnessGPoints
+      totalFitness += c.calculateFitnessStandard();
+       
       if (!c.getStatus()) {
+        // updated Top 10, wenn Kreatur stirbt & in Top 10 war
         if (c.inTop10) {
           while (true) {
             int index = int (random(0, population.size()));
@@ -259,10 +260,9 @@ public class World {
 
     fitnessMaximum = this.calculateFitnessMaximum();
 
-    birth();
-
-    //println("CCC " + fitnessGPointsMaximum + " " + fitnessGPointsMaximum);
-
+    lookForMatingPartner();
+    
+    // Felder wachsen
     if (frameCount > 1) {
       growFields();
     } else {
@@ -271,14 +271,28 @@ public class World {
       }
     }
 
+    // wenn Population unter Minimalwert ist, dann werden neue Kreaturen hinzugefügt
+    int populationZahl = population.size();
+    if (populationZahl < initialPopulationSize) {
+      for (int i=0; i<initialPopulationSize-populationZahl; i++) {
+        int posX;
+        int posY;
+        do {
+          posX = (int)random(0, windowSize);
+          posY = (int)random(0, windowSize);
+        } while (!this.getField(posX, posY).isLand());
 
+        population.add(new Creature(posX, posY, fW, currentID));
+        currentID++;
+      }
+    }
+    
+    // Zeitrechnung
     year += timePerFrame;
     float neuesJahr = (float)(year * multiplier);
     year = (double)floor(neuesJahr) / multiplier;
-    if (year != 0 && year/((int)year) == 1) {
-      println("Max Generation: " + maxGeneration);
-    }
     
+    // Alter ältester Kreatur bestimmt 
     if ((year*100)%1 == 0) {
       double oldestCAge = 0;
       int oldestCID = 0; // 0 ist Dummywert
@@ -289,27 +303,33 @@ public class World {
         }
       }
 
-      fitnessGPoints.add((float)year, (float)totalFitness/population.size());
+      fitnessGPoints.add((float)year, totalFitness/population.size());
       oldestGPoints.add((float)year, (float)oldestCAge);
       averageAgeGPoints.add((float)year, (float)totalAge/population.size());
+      generationGPoints.add((float)year, maxGeneration);
       
       if (year>removePointsFromThisTime) {
         fitnessGPoints.remove(0);
         averageAgeGPoints.remove(0);
         oldestGPoints.remove(0);
+        generationGPoints.remove(0);
         
         plot.removePoint(0);
       }
 
       switch(selectedButton) {
       case FITNESS:
-        plot.addPoint((float)year, (float)totalFitness/population.size());
+        plot.addPoint((float)year, totalFitness/population.size());
         break;
       case OLDEST:
         plot.addPoint((float)year, (float)oldestCAge);
         break;
       case AVGAGE:
         plot.addPoint((float)year, (float)totalAge/population.size());
+        break;
+      case GENERATION:
+        plot.addPoint((float)year, maxGeneration);
+        break;
       }
 
       if (save) {
@@ -335,7 +355,7 @@ public class World {
     
   }
   
-  // Creature hinzufügen
+  // Kreatur hinzufügen
   public void addCreature(Creature c) {
     population.add(c);
   }
@@ -397,7 +417,7 @@ public class World {
     return null;
   }
 
-  // zeichnet die World
+  // zeichnet die Welt
   public void showWorld() {
     for (int x=0; x<worldSize; x++) {
       for (Field a : world[x]) {
@@ -405,6 +425,7 @@ public class World {
       }
     }
   }
+  
   public void showCreature() {
     stroke(1);
     strokeWeight(0.2);
@@ -413,7 +434,7 @@ public class World {
     }
     noStroke();
   }
-  // zeichnet ein Array aus Creature (meistens am Anfang genutzt) // ka ob mans noch braucht, ich lass es einfach mal drinnen
+  // zeichnet ein Array aus Kreaturen (meistens am Anfang genutzt)
   public void showCreature(Creature[] cArray) {
     stroke(1);
     strokeWeight(0.2);
@@ -437,7 +458,7 @@ public class World {
     return population.toArray(new Creature[population.size()]);
   }
 
-  public Field getField(int x, int y) { // funktioniert nur bei schönen Zahle, muss noch besser werden (1000, 100, etc)
+  public Field getField(int x, int y) {
     float xField = (x - (x % fW)) / fW;
     float yField = (y - (y % fW)) / fW;
     if (xField >= worldSize) {
@@ -446,13 +467,12 @@ public class World {
     if (yField >= worldSize) {
       yField = 0;
     }
-    //println("x: " + x + " xField: " + xField + "         y: " + y + " yField: " + yField);
     return world[(int)xField][(int)yField];
   }
 
   public Field getFieldInArray(int x, int y) {
     try {
-      if (x != -1 && x != worldSize && y != -1 && y != worldSize) { // um die ArrayIndexOutOfWoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist tredzdem zur sicherheit da
+      if (x != -1 && x != worldSize && y != -1 && y != worldSize) { // um die ArrayIndexOutOfWoundsException zu umgehen, die normalerweise auftreten würde // try-catch Block ist trotzdem zur Sicherheit da
         return world[x][y];
       } else return null;
     } 

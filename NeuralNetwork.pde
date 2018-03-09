@@ -1,5 +1,7 @@
 public class NeuralNetwork {
 
+  // erklärt in Video
+  
   Matrix inputLayer;
   Matrix outputLayer;
   
@@ -7,12 +9,12 @@ public class NeuralNetwork {
   Matrix[] hiddenLayer;
 
 
-  int iLLength = 10; // Grund in NN_Planung.txt ersichtlich
-  int oLLength = 6; // Grund in NN_Planung.txt ersichtlich
+  int iLLength = 10;
+  int oLLength = 6;
   int hLAmount;
 
-
-  NeuralNetwork(int hLLength, int hLAmount) { // hiddenSchicht1
+  // Konstruktor bei 1. Generation an Kreaturen, Weights zufällig
+  NeuralNetwork(int hLLength, int hLAmount) {
     
     this.hLAmount = hLAmount;
     
@@ -45,8 +47,8 @@ public class NeuralNetwork {
     outputLayer = new Matrix(oLLength, 1);
   }
 
-
-  NeuralNetwork(int hLLength, Matrix[] w) { // hiddenSchicht1
+  // bei weiteren Generationen an Kreaturen
+  NeuralNetwork(int hLLength, Matrix[] w) {
     
     hLAmount = w.length-1;
     
@@ -78,7 +80,6 @@ public class NeuralNetwork {
     outputLayer = new Matrix(oLLength, 1);
   }
 
-
   public void update() {
     for(int i=0; i<hLAmount; i++){
       if(i==0){
@@ -94,7 +95,6 @@ public class NeuralNetwork {
   }
 
   //// getter
-  // InputNeuronen, setzt voraus dass so viele Neuronen generiert wurden, wie es hier Werte gibt
   public void setInputNVelocity(float v) {
     inputLayer.set(0, 0, v);
   }
@@ -114,7 +114,7 @@ public class NeuralNetwork {
     inputLayer.set(5, 0, v);
   }
   
-  ////Sensor
+  //// Fühler
 
   public void setInputNSensorEnemyEnergy(float v) {
     inputLayer.set(6, 0, v);
@@ -126,18 +126,18 @@ public class NeuralNetwork {
     inputLayer.set(8, 0, v);
   }
   
-  ////Nicht mehr Fühler
+  //// Nicht mehr Fühler
   
   public void setInputNPartnerFitness(float v) {
     inputLayer.set(9, 0, v);
   }
 
-  // OutputNeuronen
+  //// OutputSchicht
   public float getGeschwindigkeit(Creature c) {
     return outputLayer.get(0, 0) * c.getMaxVelocity();
   }
   public float getRotation() {
-    return map(outputLayer.get(1, 0), 0, 1, -Creature.maxMovementRotationAngle/2, Creature.maxMovementRotationAngle/2); // muss noch sehen, wie die Rotation wirklich laeuft
+    return map(outputLayer.get(1, 0), 0, 1, -Creature.maxMovementRotationAngle/2, Creature.maxMovementRotationAngle/2);
   }
   public float getMemory() {
     return outputLayer.get(2, 0);
@@ -152,8 +152,6 @@ public class NeuralNetwork {
   public float getAttackWill() {
     return outputLayer.get(5, 0);
   }
-
-  // Sensor
 
   // andere getter
   public Matrix[] getWeights() {

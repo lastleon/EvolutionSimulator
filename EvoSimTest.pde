@@ -3,7 +3,7 @@ import grafica.*;
 //// Verschiedene Buttonarten
 
 //    ! Reihenfolge darf nicht verändert werden !    //
-enum ButtonType {FITNESS, AVGAGE, OLDEST, FLOOD};
+enum ButtonType {FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION};
 
 //// Outputs zum speichern der Daten
 
@@ -104,7 +104,8 @@ void draw() {
 // Eventhandler
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-
+  
+  // Grenzwerte der Scale werden überprüft
   scale -= (e / 10)*scale;
   if (scale < 0.01) {
     scale = 0.01;
@@ -112,7 +113,8 @@ void mouseWheel(MouseEvent event) {
   if (scale > 10) {
     scale = 10;
   }
-
+  
+  // zoom auf Mauszeiger
   if (!(scale <= 0.01 || scale >= 10)) {
     float rMouseX = (mouseX-(xOffsetTotal))/scale;
     float rMouseY = (mouseY-(yOffsetTotal))/scale;
@@ -122,6 +124,7 @@ void mouseWheel(MouseEvent event) {
   }
 }
 void mouseDragged() {
+  // offset pro Frame wird berechnet und zu Gesamtoffset addiert, wenn Maus gedrückt ist
   if (locked) {
     xOffset = (mouseX - xPressed);
     yOffset = (mouseY - yPressed);
@@ -133,14 +136,17 @@ void mouseDragged() {
   }
 }
 void keyPressed() {
+  // Leertaste : zoom & offset zurückgesetzt
   if (key ==' ') {
     scale = 1;
     xOffsetTotal = 0;
     yOffsetTotal = 0;
   }
+  // GODMODE
   if (key == 'g'){
     godmode = !godmode;
   }
+  // GODMODE kommandos
   if (key == 'n' && godmode == true) {
     map.population.add(new Creature(mouseX, mouseY, map.fW, currentID));
     currentID++;
@@ -148,11 +154,13 @@ void keyPressed() {
 }
 
 void mousePressed() {
+  // temporäre Variablen für Offsetberechnung
   locked = true;
   xPressed = mouseX;
   yPressed = mouseY;
 }
 void mouseReleased() {
+  // offset soll nicht mehr berechnet werden
   locked = false;
   cursor(ARROW);
 }

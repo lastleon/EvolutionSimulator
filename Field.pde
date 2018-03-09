@@ -1,23 +1,26 @@
 class Field {
 
+  //// Positionswerte
+  float posX;
+  float posY;
+  float fieldWidth;
+  float noiseHeight;
+  int arrayPosX;
+  int arrayPosY;
+  
+  float oceanLevel = World.stdOceanLevel;
+  
+  //// Energie- & Wachstumswerte
   final public static float maxOverallEnergy = 100;
-  float posX, posY;
-  float noiseHeight; //noise-Hoehe
-  float regenerationrate;
   float energyValue = 0;
   float maxEnergyValue;
-  float fieldWidth;
+  float regenerationrate;
   float maxRegenerationrate = maxOverallEnergy/1000;
   float[] influencingValues;
   boolean influenceable;
 
-  int arrayPosX;
-  int arrayPosY;
-
   
-
-  float oceanLevel = World.stdOceanLevel;
-
+  //                     h: noise Höhe, fW: Feldbreite, aX,aY: array Position
   Field(float x, float y, float h, float fW, int aX, int aY) {
     posX = x;
     posY = y;
@@ -36,8 +39,9 @@ class Field {
       influenceable = false;
     }
   }
-
-  public void grow() { // Das ist wahrscheinlich ein Performance-eatdes Monster, sollte man bei Gelegenheit optimieren // btw das ist sehr hässlich geschrieben
+  
+  // Wachstumsalgorithmus
+  public void grow() {
     if (influenceable && noiseHeight>oceanLevel) {
       float rest = maxRegenerationrate - regenerationrate;
       influencingValues = sort(influencingValues);
@@ -55,7 +59,7 @@ class Field {
     energyValue += regenerationrate;
     if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
   }
-
+  
   public boolean isLand() {
      return noiseHeight>oceanLevel;
   }
@@ -67,7 +71,7 @@ class Field {
 
   public void drawField() {
     if (noiseHeight>oceanLevel) {
-      fill(map(energyValue, 0, maxEnergyValue, 255, 80), map(energyValue, 0, maxEnergyValue, 210, 140), 20); //muss noch geändert werden
+      fill(map(energyValue, 0, maxEnergyValue, 255, 80), map(energyValue, 0, maxEnergyValue, 210, 140), 20);
     } else {
       fill(0, 0, map(noiseHeight, 0, oceanLevel, 0, 140));
       if(energyValue > 0){
@@ -93,6 +97,8 @@ class Field {
   public float getGrown() {
     return energyValue/maxOverallEnergy;
   }
+  
+  // Wachstumsalgorithmus
   public void influenceByWater() {
     boolean water = false;
     if (arrayPosX > 0 && !water) water = !map.getFieldInArray(arrayPosX-1, arrayPosY).isLand();
@@ -104,7 +110,8 @@ class Field {
       influenceable = false;
     }
   }
-
+  
+  // Wachstumsalgorithmus
   public void influenceNeighbours() {
     if (arrayPosX > 0) {
       Field f = map.getFieldInArray(arrayPosX-1, arrayPosY);

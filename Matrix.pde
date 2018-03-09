@@ -1,4 +1,6 @@
 class Matrix {
+  // Implementation von Matrizen
+  
   int rows;
   int cols;
   float[][] m;
