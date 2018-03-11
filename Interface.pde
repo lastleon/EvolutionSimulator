@@ -189,8 +189,8 @@ class Interface extends PApplet {   //<>//
   class Label{
     float posX;
     float posY;
-    float bWidth;
-    float bHeight;
+    float lWidth;
+    float lHeight;
     String name;
 
     color rectC;
@@ -199,8 +199,8 @@ class Interface extends PApplet {   //<>//
     Label(float x, float y, float w, float h, String n, color rC, color tC) {   
       posX = x;
       posY = y;
-      bWidth = w;
-      bHeight = h;
+      lWidth = w;
+      lHeight = h;
       name = n;
       rectC = rC;
       textC = tC;
@@ -210,13 +210,15 @@ class Interface extends PApplet {   //<>//
       stroke(0);
 
       fill(rectC);
-      rect(posX, posY, bWidth, bHeight, 10);
+      rect(posX, posY, lWidth, lHeight, 10);
 
       fill(textC);
       textAlign(CENTER);
       textSize(20);
-      text(name, posX+bWidth/2, (posY+bHeight/2));
+      text(name, posX+lWidth/2, (posY+lHeight/2));
+      text(round((1-map.floodDuration/map.initialFloodDuration)*100)+"%",posX+lWidth/2, posY+lHeight/2+20);
       noStroke();
+      
     }
   }
 }

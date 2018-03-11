@@ -83,18 +83,18 @@ public class NeuralNetwork {
   public void update() {
     for(int i=0; i<hLAmount; i++){
       if(i==0){
-        hiddenLayer[i].mult(inputLayer, weights[i]);
+        hiddenLayer[i].mult(weights[i], inputLayer);
         hiddenLayer[i].sigmoid();
       } else {
-        hiddenLayer[i].mult(hiddenLayer[i-1], weights[i]);
+        hiddenLayer[i].mult(weights[i], hiddenLayer[i-1]);
         hiddenLayer[i].sigmoid();
       }
     }
-    outputLayer.mult(hiddenLayer[hLAmount-1], weights[hLAmount]);  
+    outputLayer.mult(weights[hLAmount], hiddenLayer[hLAmount-1]);  
     outputLayer.sigmoid();
   }
 
-  //// getter
+  //// setter
   public void setInputNVelocity(float v) {
     inputLayer.set(0, 0, v);
   }

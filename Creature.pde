@@ -8,19 +8,19 @@ public class Creature {
   
   // Verbrauch Land & Wasser
   float movementConsumption = 3;
-  float additionalMovementConsumptionInWater = 5;
+  float additionalMovementConsumptionInWater = 10;
   // Wasserreibung 
-  float waterFriction = 0.1;
+  float waterFriction = 0.2;
   
   //// Gene
   float eatingRate = World.stdEatingRate; // GEN
   float maxVelocity = World.stdMaxVelocity; //GEN
   float attackValue = World.stdAttackValue; // GEN
-  float reproductionWaitingPeriod = World.stdReproductionWaitingPeriod; // GEN
   
   //// wichtige Werte für die Kreatur
   color furColour;
-  float energy = 1400.0;
+  float energy = 1000.0;
+  float reproductionWaitingPeriod = 0.4;
   // wird an Welt & Energielevel skaliert
   float diameter;
   boolean readyToGiveBirth = false;
@@ -30,7 +30,7 @@ public class Creature {
   //// statische Werte
   final static float mutationRate = 0.2;
   final static float maxEnergy = 2500.0;
-  final static float energyConsumption = 2;
+  final static float energyConsumption = 5;
   final static float birthEnergy = 800;
   final static float reproductionWill = 0.4;
   final static float reproductionThreshold = 0.5;
@@ -49,7 +49,7 @@ public class Creature {
   NeuralNetwork NN;
   // Hiddenlayerwerte
   int hLAmount = 1;
-  int hLLength = 8;
+  int hLLength = 9;
   
   float memory = 1;
   float fitness = 0;
@@ -80,8 +80,8 @@ public class Creature {
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
-  //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, r1, r2: Reproduktionswartezeit, a1, a2: Angriffswert
-  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float r1, float a1, float f2, float mG2, float r2, float a2, int ID) {
+  //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
+  Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
     
     id = ID;
     diameter = map.getFieldWidth()*1.25;
@@ -89,7 +89,6 @@ public class Creature {
     // Gene der Eltern werden vermischt & mutiert
     eatingRate = mutate(mixGenes(f1, f2));
     maxVelocity = mutate(mixGenes(mG1, mG2));
-    reproductionWaitingPeriod = mutate(mixGenes(r1, r2));
     attackValue = mutate(mixGenes(a1, a2));
 
     generation = g+1;
@@ -167,7 +166,7 @@ public class Creature {
     // Memory
     NN.setInputNMemory(map(memory, 0, 1, -6, 6));
     // Bias // immer 1
-    NN.setInputNBias(1);
+    NN.setInputNBias(6);
     // Richtung
     NN.setInputNDirection(map(degrees(velocity.heading()), -180, 180, -6, 6));
     // Paarungspartner/Gegner Fitness
@@ -250,7 +249,7 @@ public class Creature {
 
   // Grundverbrauch
   public void live() {
-    energy -= energyConsumption*(age/100);
+    energy -= energyConsumption*(age/7);
   }
   public void hit() {
     redtime = 30;
@@ -264,8 +263,7 @@ public class Creature {
     float eatingRate = ((this.getEatingRate() - World.stdEatingRate)/World.stdEatingRate)*2;
     float maxV = ((this.getMaxVelocity() - World.stdMaxVelocity)/World.stdMaxVelocity)*2;
     float attack = ((this.getAttackValue() - World.stdAttackValue)/World.stdAttackValue)*2;
-    float waitingPeriod = (World.stdReproductionWaitingPeriod/this.getReproductionWaitingPeriod() - 1)*2;
-    float result = (bias + a + g + eatingRate + maxV + attack + waitingPeriod);
+    float result = (bias + a + g + eatingRate + maxV + attack);
     if(result < 0){
       result = 0;
     }

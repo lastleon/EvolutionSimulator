@@ -12,18 +12,18 @@ class Matrix {
     
   }
 
-  void mult(Matrix m1,Matrix m2) {
-    assert(m2.cols == m1.rows);
-    for (int x = 0; x < m2.rows; x++) {
-      for (int y = 0; y < m1.cols; y++) {
-        set(x, y, mult(m2.getRow(x), m1.getCol(y)));
+  void mult(Matrix m1, Matrix m2) {
+    assert(m1.cols == m2.rows);
+    for(int i=0; i<m1.rows; i++){
+      for(int j=0; j<m2.cols; j++){
+        this.set(i, j, mult(m1.getRow(i), m2.getCol(j)));
       }
     }
   }
-  float mult(float[] i1, float[] i2) {
+  float mult(float[] i, float[] j) {
     float result = 0;
-    for (int x = 0; x < i1.length; x++) {
-      result += i1[x] * i2[x];
+    for (int x = 0; x < i.length; x++) {
+      result += i[x] * j[x];
     }
     return result;
   }
@@ -40,25 +40,25 @@ class Matrix {
   }
   
   void setRandom(float v1, float v2){
-    for (int x = 0; x < rows; x++) {
-      for (int y = 0; y < cols; y++) {
-        m[x][y] = random(v1,v2);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        m[i][j] = random(v1,v2);
       }
     }
   }
   
   void printMatrix(){
     print("[");
-    for(int x=0; x<this.rows; x++){
-      if(!(x==0)){
+    for(int i=0; i<this.rows; i++){
+      if(!(i==0)){
         print(" [");
       } else {
         print("[");
       }
-      for(int y=0; y<this.cols; y++){
-        print(" " + m[x][y] + " ");
+      for(int j=0; j<this.cols; j++){
+        print(" " + m[i][j] + " ");
       }
-      if(!(x==this.rows-1)){
+      if(!(i==this.rows-1)){
         println("]");
       } else {
         print("]");
@@ -68,28 +68,30 @@ class Matrix {
   }
   
   void copyM(Matrix m2){
-    for (int x = 0; x < rows; x++) {
-      for (int y = 0; y < cols; y++) {
-        m[x][y] = m2.m[x][y];
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        m[i][j] = m2.m[i][j];
       }
     }
   }
   float[] getRow(int r) {
     return m[r];
   }
-  float[] getCol(int c) {
+  float[] getCol(int j) {
     float[] result = new float[rows];
-    for (int x=0; x<rows; x++) {
-      result[x] = m[x][c];
+    for (int i=0; i<rows; i++) {
+      result[i] = m[i][j];
     }
     return result;
   }
 
   void sigmoid() {
-    for (int x = 0; x < rows; x++) {
-      for (int y = 0; y < cols; y++) {
-        m[x][y] = Activationfunction.sigmoid(m[x][y]);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        m[i][j] = Activationfunction.sigmoid(m[i][j]);
       }
     }
   }
+  
+  
 }
