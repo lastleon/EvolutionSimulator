@@ -462,7 +462,7 @@ public class Creature {
     
     save(id,0,rPath+"/ID.dat");
     
-    save(int(inTop10),0,rPath + "/inTo10.dat");
+    save(int(inTop10),0,rPath + "/inTop10.dat");
     
     sensor.saveSensor(rPath);
     NN.saveNeuralNetwork(rPath);

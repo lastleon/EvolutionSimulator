@@ -39,6 +39,26 @@ class Field {
       influenceable = false;
     }
   }
+  
+  Field(String path, int fNr){
+    String rPath = (path + "/Field" + fNr);
+
+    influencingValues = new float[4];
+    fieldWidth = load(2,rPath + "/fieldWidth.dat");
+    arrayPosX = (int)load(0,rPath + "/arrayPosX");
+    arrayPosY = (int)load(0,rPath + "/arrayPosY");
+    posX = arrayPosX*fieldWidth;
+    posY = arrayPosY*fieldWidth;
+    noiseHeight = load(4,rPath + "/noiseHeight.dat");
+    
+    oceanLevel = load(4,rPath + "/oceanLevel.dat");
+    
+    energyValue = load(4,rPath + "/energyValue.dat");
+    maxEnergyValue = load(3,rPath + "/maxEnergyValue.dat");
+    regenerationrate = load(4,rPath + "/regenerationrate.dat");
+    
+    influenceable = boolean((int)load(0,rPath + "/influenceable"));
+  }
 
   // Wachstumsalgorithmus
   public void grow() {
@@ -157,24 +177,5 @@ class Field {
     
     save(int(influenceable),0,f.getPath() + "/influenceable");
   }
-  
-  void loadField(String path, int fNr){
-    String rPath = (path + "/Field" + fNr);
-
-    fieldWidth = load(2,rPath + "/fieldWidth.dat");
-    arrayPosX = (int)load(0,rPath + "/arrayPosX");
-    arrayPosY = (int)load(0,rPath + "/arrayPosY");
-    posX = arrayPosX*fieldWidth;
-    posY = arrayPosY*fieldWidth;
-    noiseHeight = load(4,rPath + "/noiseHeight.dat");
-    
-    oceanLevel = load(4,rPath + "/oceanLevel.dat");
-    
-    energyValue = load(4,rPath + "/energyValue.dat");
-    maxEnergyValue = load(3,rPath + "/maxEnergyValue.dat");
-    regenerationrate = load(4,rPath + "/regenerationrate.dat");
-    
-    influenceable = boolean((int)load(0,rPath + "/influenceable"));
-}
   
 }

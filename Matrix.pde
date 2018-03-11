@@ -13,9 +13,9 @@ class Matrix {
   }
   
   Matrix(String path){
-    
     cols =(int) load(0,path+"/cols.dat");
     rows =(int) load(0,path+"/rows.dat");
+    m = new float[rows][cols];
     for(int i = 0; i< rows;i++){
       for(int j = 0; j<cols;j++){
         m[i][j] = load(6,path +  "/Wert" + (i*cols+j)+ ".dat");
@@ -119,12 +119,8 @@ class Matrix {
     save(rows,0,f.getPath() + "/rows.dat");
     for(int i = 0; i< rows;i++){
       for(int j = 0; j<cols;j++){
-        save(m[i][j],6,f.getPath() + "/Wert" + (i*cols+j)+ ".dat");
+        save(m[i][j],4,f.getPath() + "/Wert" + (i*cols+j)+ ".dat");
       }
     }    
   }
-  void loadMatrix(String path){
-    
-  }
-  
 }
