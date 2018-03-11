@@ -3,9 +3,7 @@ import grafica.*;
 //// Verschiedene Buttonarten
 
 //    ! Reihenfolge darf nicht verändert werden !    //
-enum ButtonType {
-  FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION, SAVE, LOAD
-};
+enum ButtonType {FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION, SAVE};
 
 //// Outputs zum speichern der Daten
 
@@ -43,7 +41,7 @@ int plotX = 0;
 int plotY = 0;
 int plotWidth = 250;
 int plotHeight = 250;
-float[] margin = new float[] {30, 30, 10, 10};
+float[] margin = new float[] {30,30,10,10};
 
 ButtonType selectedButton = ButtonType.FITNESS;
 
@@ -54,8 +52,6 @@ int currentID = 0;
 boolean godmode = false;
 // wenn Maus gedrückt, dann locked wahr
 boolean locked = false;
-// friert die Simulation ein
-boolean freeze = false;
 
 
 //// Welt
@@ -69,13 +65,13 @@ void setup() {
   // Einstellungen
   frameRate(50);
   noStroke();
-  loop();
+  
   // Welt erstellt
-  map = new World(20, 15); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
-
+  map = new World(100, 150, 10); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  
   // Interface (neuesFenster) erstellt
   iface = new Interface();
-
+  
   // saveDataIndex erhöht, Dateien & Writer erstellt
   if (save) {
     if (!fileExists(sketchPath("saveDataIndex.dat"))) {
@@ -93,7 +89,7 @@ void setup() {
     outputDeathsAndBirths = createWriter("./data/todeUndGeburtenLw/todeUndGeburtenLw"+fileNumber+".txt");
     outputPopulationSize = createWriter("./data/population/population"+fileNumber+".txt");
   }
-
+  
   // Welt & Kreaturen werden angezeigt
   map.showWorld();
   map.showCreature(map.getCreatures());
@@ -107,7 +103,7 @@ void draw() {
 // Eventhandler
 void mouseWheel(MouseEvent event) {
   float e = event.getCount();
-
+  
   // Grenzwerte der Scale werden überprüft
   scale -= (e / 10)*scale;
   if (scale < 0.01) {
@@ -116,7 +112,7 @@ void mouseWheel(MouseEvent event) {
   if (scale > 10) {
     scale = 10;
   }
-
+  
   // zoom auf Mauszeiger
   if (!(scale <= 0.01 || scale >= 10)) {
     float rMouseX = (mouseX-(xOffsetTotal))/scale;
@@ -146,7 +142,7 @@ void keyPressed() {
     yOffsetTotal = 0;
   }
   // GODMODE
-  if (key == 'g') {
+  if (key == 'g'){
     godmode = !godmode;
   }
   // GODMODE kommandos
@@ -186,53 +182,27 @@ int bytesToInt(byte[] b) {
   return returnValue;
 }
 
-void loadWorld(File file) {
-  noLoop();
-  if (file != null) {
-    String rPath = (file.getPath());
-
-    worldSize = (int)load(0, rPath+"/worldSize.dat");
-    map.world = new Field[worldSize][worldSize];
-
-    for (int i = 0; i<worldSize; i++) {
-      for (int j = 0; j<worldSize; j++) {
-        map.world[i][j].loadField(rPath + "/Fields", i*worldSize+j);
-      }
-    }
-
-    map.initialPopulationSize = (int) load(0, rPath+ "/initialPopulationSize.dat" );
-
-    map.population.removeAll(map.population);
-
-    for (int i = 0; i<load(0, rPath+ "/populationSize.dat" ); i++) {
-      map.population.add(new Creature(rPath+"/Creatures", i));
-    }
-  }
-  loop();
-}
-
 //// speichern & laden von 4 byte daten
-void save(float value, int precision, String path) {
-  int saveVal = int(value*pow(10, precision));
-  String[] tempBin = binary(saveVal, 32).split("");
-  String[] bin = new String[] {"", "", "", ""};
-  for (int i = 0; i<32; i++) {
+void save(float value,int precision,String path){
+  int saveVal = int(value*pow(10,precision));
+  String[] tempBin = binary(saveVal,32).split("");
+  String[] bin = new String[] {"","","",""};
+  for(int i = 0;i<32;i++){
     bin[floor(i/8)] += tempBin[i];
   }
   byte[] saveData = new byte[4];
-  for (int i = 0; i<4; i++) {
+  for(int i = 0; i<4;i++){
     saveData[i] = byte(unbinary(bin[i]));
   }
-  saveBytes(path, saveData);
+  saveBytes(path,saveData);
 }
-
-float load(int precision, String path) {
+float load(int precision,String path){
   byte[] bin = loadBytes(path);
   String s = "";
-  for (int i = 0; i<bin.length; i++) {
+  for(int i = 0;i<bin.length;i++){
     s += (binary(bin[i]));
   }
-  return unbinary(s)/pow(10, precision);
+  return unbinary(s)/pow(10,precision);
 }
 
 //// I/O Methoden
