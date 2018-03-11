@@ -15,19 +15,7 @@ class Sensor {
     position = new PVector(0, 0);
   }
   
-  Sensor(String path, Creature creature){
-    c = creature;
-    
-    orientation = new PVector();
-    position = new PVector();
-    
-    String rPath = (path + "/Sensor");
-
-    position.x = load( 4, rPath+"/positionX.dat");
-    position.y = load( 4, rPath+"/positionY.dat");
-    orientation.x = load( 4, rPath+"/orientationX.dat");
-    orientation.y = load(4, rPath+"/orientationY.dat");
-  }
+  
 
   //updated und malt den Fühler
   public void drawSensor() {
@@ -59,15 +47,7 @@ class Sensor {
     ellipse(position.x, position.y, c.getDiameter()/4, c.getDiameter()/4);
   }
 
-  void saveSensor(String path) {
-    File f = new File(path + "/Sensor");
-    f.mkdir();
-
-    save(position.x, 4, f.getPath()+"/positionX.dat");
-    save(position.y, 4, f.getPath()+"/positionY.dat");
-    save(orientation.x, 4, f.getPath()+"/orientationX.dat");
-    save(orientation.y, 4, f.getPath()+"/orientationY.dat");
-  }
+  
 
   public void rotateSensor(float angle) {
     orientation.rotate(radians(angle));

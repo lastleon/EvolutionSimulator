@@ -443,28 +443,6 @@ public class World {
     }
   }
 
-  void saveWorld(String path) {
-    freeze = true;
-    File f = new File(path + "/WorldSave");
-    f.mkdir();
-
-    save(worldSize, 0, f.getPath()+"/worldSize.dat");
-
-    for (int i = 0; i<worldSize; i++) {
-      for (int j = 0; j<worldSize; j++) {
-        world[i][j].saveField(f.getPath() + "/Fields", i*worldSize+j);
-      }
-    }
-    save(population.size(), 0, f.getPath()+ "/populationSize.dat" );
-    save(initialPopulationSize, 0, f.getPath()+ "/initialPopulationSize.dat" );
-
-    for (int i = 0; i<population.size(); i++) {
-      population.get(i).saveCreature(f.getPath()+"/Creatures", i);
-    }
-
-    freeze = false;
-  }
-
   void loadSelectedFolder() {
     selectFolder("Select file to load", "loadWorld");
   }

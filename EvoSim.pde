@@ -4,7 +4,7 @@ import grafica.*;
 
 //    ! Reihenfolge darf nicht verändert werden !    //
 enum ButtonType {
-  FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION, SAVE, LOAD
+  FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION
 };
 
 //// Outputs zum speichern der Daten
@@ -62,7 +62,7 @@ boolean freeze = false;
 public World map;
 
 void settings() {
-  size(1000, 1000);
+  size(800, 800);
 }
 
 void setup() {
@@ -71,7 +71,7 @@ void setup() {
   noStroke();
   loop();
   // Welt erstellt
-  map = new World(20, 15); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  map = new World(125,100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
 
   // Interface (neuesFenster) erstellt
   iface = new Interface();
@@ -184,55 +184,6 @@ int bytesToInt(byte[] b) {
     returnValue += int(by);
   }
   return returnValue;
-}
-
-void loadWorld(File file) {
-  noLoop();
-  if (file != null) {
-    String rPath = (file.getPath());
-
-    worldSize = (int)load(0, rPath+"/worldSize.dat");
-    map.world = new Field[worldSize][worldSize];
-
-    for (int i = 0; i<worldSize; i++) {
-      for (int j = 0; j<worldSize; j++) {
-        map.world[i][j].loadField(rPath + "/Fields", i*worldSize+j);
-      }
-    }
-
-    map.initialPopulationSize = (int) load(0, rPath+ "/initialPopulationSize.dat" );
-
-    map.population.removeAll(map.population);
-
-    for (int i = 0; i<load(0, rPath+ "/populationSize.dat" ); i++) {
-      map.population.add(new Creature(rPath+"/Creatures", i));
-    }
-  }
-  loop();
-}
-
-//// speichern & laden von 4 byte daten
-void save(float value, int precision, String path) {
-  int saveVal = int(value*pow(10, precision));
-  String[] tempBin = binary(saveVal, 32).split("");
-  String[] bin = new String[] {"", "", "", ""};
-  for (int i = 0; i<32; i++) {
-    bin[floor(i/8)] += tempBin[i];
-  }
-  byte[] saveData = new byte[4];
-  for (int i = 0; i<4; i++) {
-    saveData[i] = byte(unbinary(bin[i]));
-  }
-  saveBytes(path, saveData);
-}
-
-float load(int precision, String path) {
-  byte[] bin = loadBytes(path);
-  String s = "";
-  for (int i = 0; i<bin.length; i++) {
-    s += (binary(bin[i]));
-  }
-  return unbinary(s)/pow(10, precision);
 }
 
 //// I/O Methoden

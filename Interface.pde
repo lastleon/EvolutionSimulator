@@ -1,4 +1,4 @@
-class Interface extends PApplet {   //<>//
+class Interface extends PApplet {   //<>// //<>//
 
   // Grafika Library für Plot benutzt
   // in Video erklärt
@@ -11,8 +11,6 @@ class Interface extends PApplet {   //<>//
   Button bFlood;
   Button bGeneration;
 
-  Button bSave;
-  Button bLoad;
 
   Label floodOngoing;
 
@@ -50,10 +48,9 @@ class Interface extends PApplet {   //<>//
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
 
-    bSave = new Button(width-100, height-100, 100, 50, "Save", ButtonType.SAVE);
-    bLoad = new Button(width-200, height-100, 100, 50, "Load", ButtonType.LOAD);
+ 
 
-    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration, bSave, bLoad}; // order must not be changed
+    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration}; // order must not be changed
 
     floodOngoing = new Label(plotWidth+leftSpacing, plotHeight-75, 130, 65, "FLUT", color(255, 46, 46), color(255));
   }
@@ -101,8 +98,7 @@ class Interface extends PApplet {   //<>//
     bOldest.show();
     bGeneration.show();
     bFlood.show();
-    bSave.show();
-    bLoad.show();
+
     if (map.floodOngoing) {
       floodOngoing.show();
     }
@@ -125,10 +121,6 @@ class Interface extends PApplet {   //<>//
       buttons[selectedButton.ordinal()].selected = false;
       bGeneration.selected = true;
       selectedButton = bGeneration.type;
-    } else if (bSave.isPressed()) {
-      map.saveWorld("./data");
-    } else if (bLoad.isPressed()) {
-      map.loadSelectedFolder();
     } else if (bFlood.isPressed()) {
       map.flood();
     }

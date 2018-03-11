@@ -12,16 +12,7 @@ class Matrix {
     
   }
   
-  Matrix(String path){
-    cols =(int) load(0,path+"/cols.dat");
-    rows =(int) load(0,path+"/rows.dat");
-    m = new float[rows][cols];
-    for(int i = 0; i< rows;i++){
-      for(int j = 0; j<cols;j++){
-        m[i][j] = load(6,path +  "/Wert" + (i*cols+j)+ ".dat");
-      }
-    }
-  }
+
 
   void mult(Matrix m1, Matrix m2) {
     assert(m1.cols == m2.rows);
@@ -111,16 +102,5 @@ class Matrix {
     }
   }
   
-    // Speichern und Laden
-  void saveMatrix(String path, int mN){
-    File f = new File(path + "/Matrix"+mN);
-    f.mkdir();
-    save(cols,0,f.getPath() + "/cols.dat");
-    save(rows,0,f.getPath() + "/rows.dat");
-    for(int i = 0; i< rows;i++){
-      for(int j = 0; j<cols;j++){
-        save(m[i][j],4,f.getPath() + "/Wert" + (i*cols+j)+ ".dat");
-      }
-    }    
-  }
+
 }

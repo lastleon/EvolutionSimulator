@@ -114,39 +114,7 @@ public class Creature {
     sensor = new Sensor(this);
   }
   
-  Creature(String path, int CNr){
-    position = new PVector();
-    velocity = new PVector();
-    
-    String rPath = path + "/Creature" + CNr;
-    
-    position.x = load(4,rPath + "/positionX.dat");
-    position.y = load(4,rPath + "/positionY.dat");
-    velocity.x = load(4,rPath + "/velocityX.dat");
-    velocity.y = load(4,rPath + "/velocityY.dat");
-    
-    eatingRate = load(5,rPath + "/eatingRate.dat");
-    maxVelocity = load(5,rPath + "/maxVelocity.dat");
-    attackValue = load(5,rPath + "/attackValue.dat");
-    
-    furColour = color(load(2,rPath+"/Colour/red.dat"),load(2,rPath+"/Colour/green.dat"),load(2,rPath+"/Colour/blue.dat"));
 
-    energy = load(2,rPath+"/energy.dat");
-    
-    readyToGiveBirth = boolean((int)load(0,rPath + "/readyToGiveBirth.dat"));
-    lastBirth = load(3,rPath + "/lastBirth.dat");
-    
-    age = load(5,rPath+"/age.dat");  
-    generation = (int)load(0,rPath+"/generation.dat");
-    
-    id = (int)load(0,rPath+"/ID.dat");
-    
-    inTop10 = boolean(int(load(0,rPath+"/inTop10.dat")));
-    
-    sensor = new Sensor(rPath, this);
-    NN = new NeuralNetwork(rPath);
-    
-  }
   
   // Kreatur wird gemalt
   public void drawCreature() {
@@ -433,40 +401,6 @@ public class Creature {
   }
   
   ////speichern und laden
-  
-  void saveCreature(String path, int CNr){
-    File f = new File(path + "/Creature" + CNr);
-    f.mkdir();
-    String rPath = f.getPath();
-    
-    save(position.x,4,rPath + "/positionX.dat");
-    save(position.y,4,rPath + "/positionY.dat");
-    save(velocity.x,4,rPath + "/velocityX.dat");
-    save(velocity.y,4,rPath + "/velocityY.dat");
-    
-    save(eatingRate,5,rPath + "/eatingRate.dat");
-    save(maxVelocity,5,rPath + "/maxVelocity.dat");
-    save(attackValue,5,rPath + "/attackValue.dat");
-    
-    save(red(furColour),2,rPath+"/Colour/red.dat");
-    save(green(furColour),2,rPath+"/Colour/green.dat");
-    save(blue(furColour),2,rPath+"/Colour/blue.dat");
-
-    save(energy,2,rPath+"/energy.dat");
-    
-    save(int(readyToGiveBirth),0,rPath + "/readyToGiveBirth.dat");
-    save((float)lastBirth,3,rPath + "/lastBirth.dat");
-    
-    save((float) age,5,rPath+"/age.dat");  
-    save(generation,0,rPath+"/generation.dat");
-    
-    save(id,0,rPath+"/ID.dat");
-    
-    save(int(inTop10),0,rPath + "/inTop10.dat");
-    
-    sensor.saveSensor(rPath);
-    NN.saveNeuralNetwork(rPath);
-  }
   
   
   public void memorise(float m, float m2) {

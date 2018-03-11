@@ -39,27 +39,7 @@ class Field {
       influenceable = false;
     }
   }
-  
-  Field(String path, int fNr){
-    String rPath = (path + "/Field" + fNr);
-
-    influencingValues = new float[4];
-    fieldWidth = load(2,rPath + "/fieldWidth.dat");
-    arrayPosX = (int)load(0,rPath + "/arrayPosX");
-    arrayPosY = (int)load(0,rPath + "/arrayPosY");
-    posX = arrayPosX*fieldWidth;
-    posY = arrayPosY*fieldWidth;
-    noiseHeight = load(4,rPath + "/noiseHeight.dat");
-    
-    oceanLevel = load(4,rPath + "/oceanLevel.dat");
-    
-    energyValue = load(4,rPath + "/energyValue.dat");
-    maxEnergyValue = load(3,rPath + "/maxEnergyValue.dat");
-    regenerationrate = load(4,rPath + "/regenerationrate.dat");
-    
-    influenceable = boolean((int)load(0,rPath + "/influenceable"));
-  }
-
+ 
   // Wachstumsalgorithmus
   public void grow() {
     if (influenceable && noiseHeight>oceanLevel) {
@@ -158,24 +138,7 @@ class Field {
       }
     }
   }
-  
-    // save & load
-  void saveField(String path, int fNr){
-    File f = new File(path + "/Field" + fNr);
-    f.mkdir();
-    
-    save(fieldWidth,2,f.getPath() + "/fieldWidth.dat");
-    save(arrayPosX,0,f.getPath() + "/arrayPosX");
-    save(arrayPosY,0,f.getPath() + "/arrayPosY");
-    save(noiseHeight,4,f.getPath() + "/noiseHeight.dat");
-    
-    save(oceanLevel,4,f.getPath() + "/oceanLevel.dat");
-    
-    save(energyValue,4,f.getPath() + "/energyValue.dat");
-    save(maxEnergyValue,3,f.getPath() + "/maxEnergyValue.dat");
-    save(regenerationrate,4,f.getPath() + "/regenerationrate.dat");
-    
-    save(int(influenceable),0,f.getPath() + "/influenceable");
-  }
+
+  // save & load
   
 }
