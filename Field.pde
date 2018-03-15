@@ -8,17 +8,14 @@ class Field {
   int arrayPosX;
   int arrayPosY;
 
-  float oceanLevel = World.stdOceanLevel;
-
   //// Energie- & Wachstumswerte
-  final public static float maxOverallEnergy = 300;
+  final public static float maxOverallEnergy = 200;
   float energyValue = 0;
   float maxEnergyValue;
   float regenerationrate;
-  float maxRegenerationrate = maxOverallEnergy/600;
+  float maxRegenerationrate = maxOverallEnergy/500;
   float[] influencingValues;
   boolean influenceable;
-  float influencingThreshold = 0.75;
 
   //                     h: noise Höhe, fW: Feldbreite, aX,aY: array Position
   Field(float x, float y, float h, float fW, int aX, int aY) {
@@ -53,7 +50,7 @@ class Field {
         rest = maxRegenerationrate - regenerationrate;
       }
     }
-    regenerationrate *= World.stdOceanLevel+20/noiseHeight;
+    regenerationrate *= stdOceanLevel+20/noiseHeight;
     if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
 
     energyValue += regenerationrate;
@@ -70,8 +67,9 @@ class Field {
   }
 
   public void drawField() {
+    noStroke();
     if (noiseHeight>oceanLevel) {
-      fill(map(energyValue, 0, maxEnergyValue, 255, 80), map(energyValue, 0, maxEnergyValue, 210, 140), 20);
+      fill(map(energyValue, 0, maxEnergyValue+1, 255, 80), map(energyValue, 0, maxEnergyValue+1, 210, 140), 20);
     } else {
       fill(0, 0, map(noiseHeight, 0, oceanLevel, 0, 140));
       if (energyValue > 0) {
@@ -101,13 +99,17 @@ class Field {
   // Wachstumsalgorithmus
   public void influenceByWater() {
     boolean water = false;
-    if (arrayPosX > 0 && !water) water = !map.getFieldInArray(arrayPosX-1, arrayPosY).isLand();
-    if (arrayPosY > 0 && !water) water = !map.getFieldInArray(arrayPosX, arrayPosY-1).isLand();
-    if (arrayPosX < worldSize -1 && !water) water = !map.getFieldInArray(arrayPosX+1, arrayPosY).isLand();
-    if (arrayPosY < worldSize -1 && !water) water = !map.getFieldInArray(arrayPosX, arrayPosY+1).isLand();
+    if (arrayPosX > 0) water = !map.getFieldInArray(arrayPosX-1, arrayPosY).isLand();
+    if (!water && arrayPosY > 0) water = !map.getFieldInArray(arrayPosX, arrayPosY-1).isLand();
+    if (!water && arrayPosX < worldSize -1 ) water = !map.getFieldInArray(arrayPosX+1, arrayPosY).isLand();
+    if (!water && arrayPosY < worldSize -1) water = !map.getFieldInArray(arrayPosX, arrayPosY+1).isLand();
+    
     if (water) {
       regenerationrate = maxRegenerationrate;
       influenceable = false;
+    }else{
+      regenerationrate = 0;
+      influenceable = true;
     }
   }
 

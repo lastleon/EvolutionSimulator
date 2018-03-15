@@ -1,4 +1,4 @@
-class Interface extends PApplet {   //<>// //<>//
+class Interface extends PApplet {    //<>//
 
   // Grafika Library für Plot benutzt
   // in Video erklärt
@@ -7,10 +7,11 @@ class Interface extends PApplet {   //<>// //<>//
 
   Button bFitness;
   Button bAvgAge;
-  Button bOldest;
+  Button bPopulation;
   Button bFlood;
   Button bGeneration;
 
+  Slider sPopulation;
 
   Label floodOngoing;
 
@@ -44,13 +45,13 @@ class Interface extends PApplet {   //<>// //<>//
     bFitness.selected = true;
 
     bAvgAge = new Button(0, plotHeight + 50, 100, 50, "Ø Alter", ButtonType.AVGAGE);
-    bOldest = new Button(100, plotHeight, 100, 50, "Ältestes Alter", ButtonType.OLDEST);
+    bPopulation = new Button(100, plotHeight, 100, 50, "Population", ButtonType.POPULATION);
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
 
- 
+    sPopulation = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 20, 400);
 
-    buttons = new Button[] {bFitness, bAvgAge, bOldest, bFlood, bGeneration}; // order must not be changed
+    buttons = new Button[] {bFitness, bAvgAge, bPopulation, bFlood, bGeneration}; // order must not be changed
 
     floodOngoing = new Label(plotWidth+leftSpacing, plotHeight-75, 130, 65, "FLUT", color(255, 46, 46), color(255));
   }
@@ -62,6 +63,7 @@ class Interface extends PApplet {   //<>// //<>//
     stroke(0);
     line(plotWidth, 0, plotWidth, plotHeight);
     line(0, plotHeight, width, plotHeight);
+    map.minPopulationSize = (int)sPopulation.getValue();
   }
 
   void drawPlot() {
@@ -92,12 +94,16 @@ class Interface extends PApplet {   //<>// //<>//
     textAlign(LEFT);
     text("Jahre: " + year/100, plotWidth + leftSpacing, upSpacing);
     text("Bewohner: " + map.population.size(), plotWidth + leftSpacing, upSpacing + 17 + lineSpacing);
+    textSize(10);
+    text("Mindest-Bewohnerzahl: " + (int)sPopulation.getValue(), plotWidth + leftSpacing, upSpacing + 50 + lineSpacing);
 
     bFitness.show();
     bAvgAge.show();
-    bOldest.show();
+    bPopulation.show();
     bGeneration.show();
     bFlood.show();
+
+    sPopulation.show();
 
     if (map.floodOngoing) {
       floodOngoing.show();
@@ -113,10 +119,10 @@ class Interface extends PApplet {   //<>// //<>//
       buttons[selectedButton.ordinal()].selected = false;
       bAvgAge.selected = true;
       selectedButton = bAvgAge.type;
-    } else if (bOldest.isPressed()) {
+    } else if (bPopulation.isPressed()) {
       buttons[selectedButton.ordinal()].selected = false;
-      bOldest.selected = true;
-      selectedButton = bOldest.type;
+      bPopulation.selected = true;
+      selectedButton = bPopulation.type;
     } else if (bGeneration.isPressed()) {
       buttons[selectedButton.ordinal()].selected = false;
       bGeneration.selected = true;
@@ -124,12 +130,12 @@ class Interface extends PApplet {   //<>// //<>//
     } else if (bFlood.isPressed()) {
       map.flood();
     }
-    
+
     switch(selectedButton) {
     case FITNESS:
       plot.setPoints(map.fitnessGPoints);
       break;
-    case OLDEST:
+    case POPULATION:
       plot.setPoints(map.oldestGPoints);
       break;
     case AVGAGE:
@@ -139,6 +145,12 @@ class Interface extends PApplet {   //<>// //<>//
       plot.setPoints(map.generationGPoints);
       break;
     }
+
+    sPopulation.changeValue();
+  }
+
+  void mouseDragged() {
+    sPopulation.changeValue();
   }
 
 
@@ -226,6 +238,60 @@ class Interface extends PApplet {   //<>// //<>//
       text(name, posX+lWidth/2, (posY+lHeight/2));
       text(round((1-map.floodDuration/map.initialFloodDuration)*100)+"%", posX+lWidth/2, posY+lHeight/2+20);
       noStroke();
+    }
+  }
+  class Slider {
+    float posX, posY;
+    float sWidth, sHeight;
+    float lowerLimit, upperLimit;
+    float value;
+    float sliderX;
+    float sliderWidth, sliderHeight;
+
+    Slider(float x, float y, float w, float h, float lower, float upper) {
+      posX = x;
+      posY = y;
+      sWidth = w;
+      sHeight = h;
+      lowerLimit = lower;
+      upperLimit = upper;
+      sliderX = (2*posX + sWidth)/2;   
+      sliderWidth = sWidth/8;
+      sliderHeight = sHeight*0.8;
+      value = map(sliderX, posX+sliderWidth, posX+sWidth-sliderWidth, lowerLimit, upperLimit);
+    }
+
+    void show() {
+      color rectC;
+      color sliderC;
+      stroke(0);
+
+      rectC = color(6, 9, 46);
+      sliderC = color(255);
+
+      fill(rectC);
+      rect(posX, posY, sWidth, sHeight, 10);
+      rectMode(CENTER);
+      fill(155);
+      rect(posX + sWidth/2, posY+sHeight/2, sWidth-2*sliderWidth, sliderHeight*0.25,3);
+      fill(sliderC);
+      rect(sliderX, posY+sHeight/2, sliderWidth, sliderHeight, 5);
+      noStroke();
+      rectMode(CORNER);
+    }
+
+    void changeValue() {
+      if (isPressed() && mouseX > posX+sliderWidth && mouseX < posX+sWidth-sliderWidth) {
+        sliderX = mouseX;
+      }
+      value = map(sliderX, posX+sliderWidth, posX+sWidth-sliderWidth, lowerLimit, upperLimit);
+    }
+
+    boolean isPressed() {
+      return (mouseX>sliderX-sliderWidth/2  && mouseX<sliderX+sliderWidth/2 && mouseY > posY+sHeight*0.1 && mouseY < posY + sliderHeight+sHeight*0.1 && mousePressed);
+    }
+    float getValue() {
+      return value;
     }
   }
 }

@@ -4,7 +4,7 @@ import grafica.*;
 
 //    ! Reihenfolge darf nicht verändert werden !    //
 enum ButtonType {
-  FITNESS, AVGAGE, OLDEST, FLOOD, GENERATION
+  FITNESS, AVGAGE, POPULATION, FLOOD, GENERATION
 };
 
 //// Outputs zum speichern der Daten
@@ -60,9 +60,12 @@ boolean freeze = false;
 
 //// Welt
 public World map;
+final public static float stdOceanLevel = 44;
+float oceanLevel = stdOceanLevel;
 
 void settings() {
-  size(800, 800);
+  size(700, 700);
+  //fullScreen();
 }
 
 void setup() {
@@ -71,7 +74,7 @@ void setup() {
   noStroke();
   loop();
   // Welt erstellt
-  map = new World(125,100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  map = new World(125,200); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
 
   // Interface (neuesFenster) erstellt
   iface = new Interface();
@@ -153,6 +156,12 @@ void keyPressed() {
   if (key == 'n' && godmode == true) {
     map.population.add(new Creature(mouseX, mouseY, map, currentID));
     currentID++;
+  }
+  if (key == 'd' && godmode == true) {
+    Creature c = map.getCreature(new PVector(mouseX,mouseY));
+    if(c != null){
+      map.population.remove(map.population.indexOf(c));
+    }
   }
 }
 

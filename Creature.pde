@@ -7,7 +7,7 @@ public class Creature {
   PVector velocity;
   
   // Verbrauch Land & Wasser
-  float movementConsumption = 3;
+  float movementConsumption = 2;
   float additionalMovementConsumptionInWater = 10;
   // Wasserreibung 
   float waterFriction = 0.2;
@@ -20,7 +20,7 @@ public class Creature {
   //// wichtige Werte für die Kreatur
   color furColour;
   float energy = 1000.0;
-  float reproductionWaitingPeriod = 0.4;
+  float reproductionWaitingPeriod = 0.25;
   // wird an Welt & Energielevel skaliert
   float diameter;
   boolean readyToGiveBirth = false;
@@ -30,13 +30,13 @@ public class Creature {
   //// statische Werte
   final static float mutationRate = 0.15;
   final static float maxEnergy = 2500.0;
-  final static float energyConsumption = 10;
+  final static float energyConsumption = 5;
   final static float birthEnergy = 800;
   final static float reproductionWill = 0.4;
   final static float reproductionThreshold = 0.5;
   final static float mixingThreshold = 0.3;
   final static int maxMovementRotationAngle = 20; // Grad
-  final static float energyConsumptionRotation = 6;
+  final static float energyConsumptionRotation = 2;
   
   //// Berechnungsvariablen
   float lastBirth = 0;
@@ -113,9 +113,8 @@ public class Creature {
     
     sensor = new Sensor(this);
   }
-  
 
-  
+ 
   // Kreatur wird gemalt
   public void drawCreature() {
     // Durchmesser an Energielevel angepasst
@@ -134,18 +133,19 @@ public class Creature {
     if (redtime %4==0) {
       red = !red;
     }
+    stroke(0);
     sensor.drawSensor();
     // Körper
     ellipse(position.x, position.y, diameter , diameter );
     // wenn in Top 10, dann werden Werte angezeigt
     if(inTop10){
-      textSize(14);
+      textSize(15*(diameter/(map.stdDiameter+5)));
       textAlign(CENTER);
       text("E: " + int(energy), position.x, position.y - 54);
-      text("FR: " + eatingRate, position.x, position.y-43);
-      text("V: " + maxVelocity, position.x, position.y-32);
-      text("RW: " + reproductionWaitingPeriod, position.x, position.y-21);
-      text("A: " + attackValue, position.x, position.y-10);
+      text("FR: " + round(eatingRate*100)/100, position.x, position.y-43);
+      text("V: " + round(maxVelocity*100)/100, position.x, position.y-32);
+      text("RW: " + round(reproductionWaitingPeriod*100)/100, position.x, position.y-21);
+      text("A: " + round(attackValue*100)/100, position.x, position.y-10);
     }
   }
   
@@ -272,9 +272,10 @@ public class Creature {
   }
   // Fressen
   public void eat(float will) {
-    if (will > 0.5) {
+    Field field = map.getField((int)position.x, (int)position.y);
+    if (will > 0.5 && field.isLand()) {
       energy -= energyConsumption*(age/10);
-      Field field = map.getField((int)position.x, (int)position.y);
+      
       float newFieldEnergy = field.getEnergy() - eatingRate;
 
       if (newFieldEnergy>=0) { // Feld hat genug Energie

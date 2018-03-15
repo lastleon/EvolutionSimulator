@@ -2,8 +2,8 @@ public class World {
 
   //// Veränderbare Werte
   // Flutwerte
-  float floodProbability = 0.00002;
-  float firstPossibilityOfFlood = 20;
+  double floodProbability = 0.00005;
+  float firstPossibilityOfFlood = 15;
   float maxFloodDuration = 3;
 
   // Kreatur: Standard Werte
@@ -13,18 +13,18 @@ public class World {
   float diameterMultiplier = 0.25;
 
   // Welt: Standard Werte
-  final public static float stdOceanLevel = 44;
+
   ////
   //// Welt
   // Welt
   Field[][] world;
   ArrayList<Field> land;
-  float fW = 10;
+  float fW = 8;
   float worldBounds;
 
   // Population
   ArrayList<Creature> population;
-  int initialPopulationSize;
+  int minPopulationSize;
   float stdDiameter;
 
   // Zeit
@@ -64,7 +64,7 @@ public class World {
   public World(int worldS, int c) {
 
     year = 0;
-    initialPopulationSize = c;
+    minPopulationSize = c;
     worldSize = worldS;
 
     // Arrays für Plots
@@ -74,7 +74,6 @@ public class World {
     averageAgeGPoints.add(0, 0);
 
     oldestGPoints = new GPointsArray();
-    oldestGPoints.add(0, 0);
 
     generationGPoints = new GPointsArray();
     generationGPoints.add(0, 1);
@@ -192,19 +191,16 @@ public class World {
     }
     if (floodOngoing) {
       floodDuration -= (float)timePerFrame;
+      for (Field f : land) {
+        f.influenceByWater();
+      }
       if (floodDuration <= 0) {
         floodOngoing = false;
-        for (Field f : land) {
-          f.oceanLevel = stdOceanLevel;
-        }
+        oceanLevel = stdOceanLevel;
       } else if (floodDuration/initialFloodDuration > 0.25) {
-        for (Field f : land) {
-          f.oceanLevel += floodIncreasePerFrame;
-        }
+        oceanLevel += floodIncreasePerFrame;
       } else {
-        for (Field f : land) {
-          f.oceanLevel -= floodDecreasePerFrame;
-        }
+        oceanLevel -= floodDecreasePerFrame;
       }
     }
     translate(xOffsetTotal+xOffset, yOffsetTotal+yOffset);
@@ -264,8 +260,8 @@ public class World {
 
     // wenn Population unter Minimalwert ist, dann werden neue Kreaturen hinzugefügt
     int populationZahl = population.size();
-    if (populationZahl < initialPopulationSize) {
-      for (int i=0; i<initialPopulationSize-populationZahl; i++) {
+    if (populationZahl < minPopulationSize) {
+      for (int i=0; i<minPopulationSize-populationZahl; i++) {
         int posX;
         int posY;
         do {
@@ -295,7 +291,7 @@ public class World {
       }
 
       fitnessGPoints.add((float)year, totalFitness/population.size());
-      oldestGPoints.add((float)year, (float)oldestCAge);
+      oldestGPoints.add((float)year, population.size());
       averageAgeGPoints.add((float)year, (float)totalAge/population.size());
       generationGPoints.add((float)year, maxGeneration);
 
@@ -312,8 +308,8 @@ public class World {
       case FITNESS:
         plot.addPoint((float)year, totalFitness/population.size());
         break;
-      case OLDEST:
-        plot.addPoint((float)year, (float)oldestCAge);
+      case POPULATION:
+        plot.addPoint((float)year, population.size());
         break;
       case AVGAGE:
         plot.addPoint((float)year, (float)totalAge/population.size());
