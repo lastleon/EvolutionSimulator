@@ -7,7 +7,7 @@ public class World {
   float maxFloodDuration = 3;
 
   // Kreatur: Standard Werte
-  final public static float stdEatingRate = 17;
+  final public static float stdEatingRate = 25;
   final public static float stdMaxVelocity = 2;
   final public static float stdAttackValue = 60;
   float diameterMultiplier = 0.25;
@@ -23,9 +23,10 @@ public class World {
   float worldBounds;
 
   // Population
-  ArrayList<Creature> population;
+  QuadTree population;
   int minPopulationSize;
   float stdDiameter;
+  int populationCount;
 
   // Zeit
   double year;
@@ -99,7 +100,7 @@ public class World {
     }
 
     // generiert Anfangspopulation
-    population = new ArrayList<Creature>(c);
+    population = new QuadTree(0f, 0f, worldBounds, worldBounds);
     for (int i=0; i<c; i++) {
       int posX;
       int posY;
@@ -108,29 +109,15 @@ public class World {
         posY = (int)random(0, this.worldBounds);
       } while (!this.getField(posX, posY).isLand());
 
-      population.add(new Creature(posX, posY, this, currentID));
+      population.addCreature(new Creature(posX, posY, this, currentID));
       currentID++;
-
-      // anfangs werden ersten 10 zu Top 10
-      if (i<10) {
-        top10[i] = population.get(i);
-        top10[i].inTop10 = true;
-      }
     }
   }
 
   // 
-  public void lookForMatingPartner() {
-    ArrayList<Creature> populationCopy = new ArrayList<Creature>(population);
-    for (Creature c1 : populationCopy) {
-      for (Creature c2 : populationCopy) {
-        if (!(c1.id == c2.id) && c1.collision(c2)) {
-          this.mate(c1, c2);
-          if (!c1.isReadyToGiveBirth()) {
-            break;
-          }
-        }
-      }
+  public void lookForMatingPartner(Creature c) {
+    for (Creature cr : population.query(c.position.x, c.position.y, c.diameter)) {
+      mate(c, cr);
     }
   }
 
@@ -150,6 +137,11 @@ public class World {
       c1.addEnergy(-Creature.birthEnergy);
       c2.addEnergy(-Creature.birthEnergy);
 
+
+      if(c1.sick || c2.sick && random(1) < 0.8){
+        c1.sick = true;
+        c2.sick = true;
+      }
       // Dummy-Vectoren
       PVector posC1 = new PVector(c1.getPosition().x, c1.getPosition().y);
       PVector posC2 = new PVector(c2.getPosition().x, c2.getPosition().y);
@@ -210,44 +202,21 @@ public class World {
     totalAge = 0;
     totalFitness = 0;
 
-    for (int i = population.size()-1; i>=0; i--) {
-
-      Creature c = population.get(i);
-
-      c.input();
-      c.NN.update();
-      c.live();
-      c.age();
-      c.move(c.NN.getGeschwindigkeit(c), c.NN.getRotation());
-      c.eat(c.NN.getEatingWill());
-      c.memorise(c.NN.getMemory(), c.NN.getMemory2());
-      c.attack(c.NN.getAttackWill()); // hilft, Bevölkerung nicht zu gross zu halten
-
-      totalAge += c.getAge();
-      totalFitness += c.calculateFitnessStandard();
-
-      if (!c.getStatus()) {
-        // updated Top 10, wenn Kreatur stirbt & in Top 10 war
-        if (c.inTop10) {
-          while (true) {
-            int index = int (random(0, population.size()));
-            if (!population.get(index).inTop10) {
-              top10[findInTop10(c)] = population.get(index);
-              population.get(index).inTop10 = true;
-              break;
-            }
-          }
-        }
-        population.remove(population.indexOf(c));
-        deathCountPerYear++;
-        continue;
+    population.update();
+    ArrayList<Creature> pop = population.getPopulation();
+    for (Creature c : pop) {
+      if(c.sick){
+        for(Creature cr : population.query(c.position.x,c.position.y,(stdDiameter+5)*3)){
+          if(random(1) < 1/sq(c.position.dist(cr.position)))cr.sick = true;
+        } 
       }
-      c.updateFitness();
+      lookForMatingPartner(c);
+      c.updated = false;
     }
 
-    fitnessMaximum = this.calculateFitnessMaximum();
+    fitnessMaximum = this.calculateFitnessMaximum(pop);
 
-    lookForMatingPartner();
+
 
     // Felder wachsen
     if (frameCount > 1) {
@@ -259,9 +228,9 @@ public class World {
     }
 
     // wenn Population unter Minimalwert ist, dann werden neue Kreaturen hinzugefügt
-    int populationZahl = population.size();
-    if (populationZahl < minPopulationSize) {
-      for (int i=0; i<minPopulationSize-populationZahl; i++) {
+    int populationSize = pop.size();
+    if (populationSize < minPopulationSize) {
+      for (int i=0; i<minPopulationSize-populationSize; i++) {
         int posX;
         int posY;
         do {
@@ -269,11 +238,13 @@ public class World {
           posY = (int)random(0, map.worldBounds);
         } while (!this.getField(posX, posY).isLand());
 
-        population.add(new Creature(posX, posY, this, currentID));
+        population.addCreature(new Creature(posX, posY, this, currentID));
         currentID++;
+        populationSize++;
       }
     }
-
+    pop = population.getPopulation();
+    populationCount = pop.size();
     // Zeitrechnung
     year += timePerFrame;
     float neuesJahr = (float)(year * multiplier);
@@ -283,16 +254,16 @@ public class World {
     if ((year*100)%1 == 0) {
       double oldestCAge = 0;
       int oldestCID = 0; // 0 ist Dummywert
-      for (Creature c : population) {
+      for (Creature c : pop) {
         if (c.getAge() > oldestCAge) {
           oldestCAge = c.getAge();
           oldestCID = c.getID();
         }
       }
 
-      fitnessGPoints.add((float)year, totalFitness/population.size());
-      oldestGPoints.add((float)year, population.size());
-      averageAgeGPoints.add((float)year, (float)totalAge/population.size());
+      fitnessGPoints.add((float)year, totalFitness/populationCount);
+      oldestGPoints.add((float)year, populationCount);
+      averageAgeGPoints.add((float)year, (float)totalAge/populationCount);
       generationGPoints.add((float)year, maxGeneration);
 
       if (year>removePointsFromThisTime) {
@@ -306,13 +277,13 @@ public class World {
 
       switch(selectedButton) {
       case FITNESS:
-        plot.addPoint((float)year, totalFitness/population.size());
+        plot.addPoint((float)year, totalFitness/populationCount);
         break;
       case POPULATION:
-        plot.addPoint((float)year, population.size());
+        plot.addPoint((float)year, populationCount);
         break;
       case AVGAGE:
-        plot.addPoint((float)year, (float)totalAge/population.size());
+        plot.addPoint((float)year, (float)totalAge/populationCount);
         break;
       case GENERATION:
         plot.addPoint((float)year, maxGeneration);
@@ -322,11 +293,11 @@ public class World {
       if (save) {
         outputOldestAge.print("(" + year + "," + oldestCAge + "," + oldestCID + ");");
         outputOldestAge.flush();
-        outputAverageAge.print("(" + year + "," + totalAge/population.size() + ");");
+        outputAverageAge.print("(" + year + "," + totalAge/populationCount + ");");
         outputAverageAge.flush();
-        outputAverageFitness.print("(" + year + "," + totalFitness/population.size() + ");");
+        outputAverageFitness.print("(" + year + "," + totalFitness/populationCount + ");");
         outputAverageFitness.flush();
-        outputPopulationSize.print("(" + year + "," + population.size() + ");");
+        outputPopulationSize.print("(" + year + "," + populationCount + ");");
         outputPopulationSize.flush();
 
         if (year%1==0) {
@@ -338,12 +309,13 @@ public class World {
       }
     }
     showWorld();
+    //population.drawTree();
     showCreature();
   }
 
   // Kreatur hinzufügen
   public void addCreature(Creature c) {
-    population.add(c);
+    population.addCreature(c);
   }
 
   void flood() {
@@ -355,53 +327,53 @@ public class World {
     initialFloodDuration = floodDuration;
   }
 
-  float calculateFitnessMaximum() {
+  float calculateFitnessMaximum(ArrayList<Creature> pop) {
     float maxFitness=0;
     int tempMaxGeneration = 0;
-    for (Creature c : population) {
+    for (Creature c : pop) {
       if (c.fitness > maxFitness) {
         maxFitness = c.fitness;
       }
       if (c.generation > tempMaxGeneration) {
         tempMaxGeneration = c.generation;
       }
-      addTop10(c);
     }
     maxGeneration = tempMaxGeneration;
     if (maxFitness != 0) {
       return maxFitness;
     } else return 0.001;
   }
-
+  /*
   void addTop10(Creature c) {
-    int index = 0;
-    boolean replaced = false;
-    for (int i=0; i<10; i++) {
-      if (top10[i] == c) {
-        return;
-      }
-    }
-    for (int i=0; i<10; i++) {
-      if (top10[i].fitness < c.fitness && top10[index].fitness > top10[i].fitness) {
-        index = i;
-        replaced = true;
-      }
-    }
-    if (replaced) {
-      top10[index].inTop10 = false;
-      top10[index] = c;
-      c.inTop10 = true;
-    }
-  }
-
-  Integer findInTop10(Creature c) {
-    for (int i = 0; i<10; i++) {
-      if (top10[i] == c) {
-        return i;
-      }
-    }
-    return null;
-  }
+   int index = 0;
+   boolean replaced = false;
+   for (int i=0; i<10; i++) {
+   if (top10[i] == c) {
+   return;
+   }
+   }
+   for (int i=0; i<10; i++) {
+   if (top10[i].fitness < c.fitness && top10[index].fitness > top10[i].fitness) {
+   index = i;
+   replaced = true;
+   }
+   }
+   if (replaced) {
+   top10[index].inTop10 = false;
+   top10[index] = c;
+   c.inTop10 = true;
+   }
+   }
+   
+   Integer findInTop10(Creature c) {
+   for (int i = 0; i<10; i++) {
+   if (top10[i] == c) {
+   return i;
+   }
+   }
+   return null;
+   }
+   */
 
   // zeichnet die Welt
   public void showWorld() {
@@ -415,16 +387,7 @@ public class World {
   public void showCreature() {
     stroke(1);
     strokeWeight(0.2);
-    for (Creature c : population) {
-      c.drawCreature();
-    }
-    noStroke();
-  }
-  // zeichnet ein Array aus Kreaturen (meistens am Anfang genutzt)
-  public void showCreature(Creature[] cArray) {
-    stroke(1);
-    strokeWeight(0.2);
-    for (Creature c : cArray) {
+    for (Creature c : population.getPopulation()) {
       c.drawCreature();
     }
     noStroke();
@@ -444,9 +407,6 @@ public class World {
   }
 
   //// Getter
-  public Creature[] getCreatures() {
-    return population.toArray(new Creature[population.size()]);
-  }
 
   public Field getField(int x, int y) {
     float xField = (x - (x % fW)) / fW;
@@ -474,7 +434,7 @@ public class World {
 
   public Creature getCreature(PVector v) {
 
-    for (Creature c : population) {
+    for (Creature c : population.query(v.x, v.y, stdDiameter+5)) {
       if (v.dist(c.position) < c.diameter/2) {
         return c;
       }

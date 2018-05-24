@@ -56,6 +56,8 @@ boolean godmode = false;
 boolean locked = false;
 // friert die Simulation ein
 boolean freeze = false;
+// fast forward
+int repetitions = 1;
 
 
 //// Welt
@@ -70,11 +72,11 @@ void settings() {
 
 void setup() {
   // Einstellungen
-  frameRate(50);
+  frameRate(100);
   noStroke();
   loop();
   // Welt erstellt
-  map = new World(125,200); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  map = new World(125, 1); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
 
   // Interface (neuesFenster) erstellt
   iface = new Interface();
@@ -99,12 +101,14 @@ void setup() {
 
   // Welt & Kreaturen werden angezeigt
   map.showWorld();
-  map.showCreature(map.getCreatures());
+  map.showCreature();
 }
 
 // Mainloop
 void draw() {
-  map.update();
+  for (int i=0; i<repetitions; i++) {
+    map.update();
+  }
 }
 
 // Eventhandler
@@ -154,14 +158,19 @@ void keyPressed() {
   }
   // GODMODE kommandos
   if (key == 'n' && godmode == true) {
-    map.population.add(new Creature(mouseX, mouseY, map, currentID));
+    map.population.addCreature(new Creature(mouseX, mouseY, map, currentID));
     currentID++;
   }
   if (key == 'd' && godmode == true) {
-    Creature c = map.getCreature(new PVector(mouseX,mouseY));
-    if(c != null){
-      map.population.remove(map.population.indexOf(c));
+    Creature c = map.getCreature(new PVector(mouseX, mouseY));
+    if (c != null) {
+      map.population.removeCreature(c);
     }
+  }
+  if (key == 'w') repetitions++;
+  if (key == 's') {
+    repetitions--;
+    if (repetitions<0) repetitions = 0;
   }
 }
 

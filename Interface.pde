@@ -49,7 +49,7 @@ class Interface extends PApplet {    //<>//
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
 
-    sPopulation = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 20, 400);
+    sPopulation = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 2, 380);
 
     buttons = new Button[] {bFitness, bAvgAge, bPopulation, bFlood, bGeneration}; // order must not be changed
 
@@ -93,7 +93,7 @@ class Interface extends PApplet {    //<>//
     textSize(17);
     textAlign(LEFT);
     text("Jahre: " + year/100, plotWidth + leftSpacing, upSpacing);
-    text("Bewohner: " + map.population.size(), plotWidth + leftSpacing, upSpacing + 17 + lineSpacing);
+    text("Bewohner: " + map.populationCount, plotWidth + leftSpacing, upSpacing + 17 + lineSpacing);
     textSize(10);
     text("Mindest-Bewohnerzahl: " + (int)sPopulation.getValue(), plotWidth + leftSpacing, upSpacing + 50 + lineSpacing);
 

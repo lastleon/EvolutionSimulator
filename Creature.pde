@@ -1,22 +1,22 @@
 public class Creature {
-  
+
   //// Bewegung
   // Position x & y
   PVector position;
   // Geschwindigkeit in x & y Richtung gespeichert
   PVector velocity;
-  
+
   // Verbrauch Land & Wasser
   float movementConsumption = 2;
   float additionalMovementConsumptionInWater = 10;
   // Wasserreibung 
   float waterFriction = 0.2;
-  
+
   //// Gene
   float eatingRate = World.stdEatingRate; // GEN
   float maxVelocity = World.stdMaxVelocity; //GEN
   float attackValue = World.stdAttackValue; // GEN
-  
+
   //// wichtige Werte für die Kreatur
   color furColour;
   float energy = 1000.0;
@@ -26,7 +26,7 @@ public class Creature {
   boolean readyToGiveBirth = false;
   double age = 0;
   int generation;
-  
+
   //// statische Werte
   final static float mutationRate = 0.15;
   final static float maxEnergy = 2500.0;
@@ -37,35 +37,37 @@ public class Creature {
   final static float mixingThreshold = 0.3;
   final static int maxMovementRotationAngle = 20; // Grad
   final static float energyConsumptionRotation = 2;
-  
+
   //// Berechnungsvariablen
   float lastBirth = 0;
   boolean red = false;
   float redtime = 0;
   boolean inTop10 = false;
   int id;
-  
+  boolean updated = false;
+  boolean sick = false;
+
   //// Neuronales Netzwerk
   NeuralNetwork NN;
   // Hiddenlayerwerte
   final static int hLAmount = 1;
   final static int hLLength = 7;
-  
+
   float memory = 1;
   float memory2 = 1;
   float fitness = 0;
-  
+
   //// Fühler
   Sensor sensor;
-   
-   
-   
+
+
+
   // sollte bei 1. Generation verwendet werden
   Creature(int x, int y, World world, int ID) {
-    
+
     id = ID;
     diameter = world.fW*world.diameterMultiplier;
-    
+
     generation = 1;
 
     NN = new NeuralNetwork(hLLength, hLAmount);
@@ -74,19 +76,19 @@ public class Creature {
     velocity.limit(maxVelocity);
 
     position = new PVector(x, y);
-    
+
     sensor = new Sensor(this);
-        
+
     furColour = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
   //                                  Elternweights                         Elternfellfarben       g: Generation, f1, f2: Fressrate, mG1, mG2: maxGeschwindigkeit, a1, a2: Angriffswert
   Creature(int x, int y, Matrix[] weights1, Matrix[] weights2, color furColour1, color furColour2, int g, float f1, float mG1, float a1, float f2, float mG2, float a2, int ID) {
-    
+
     id = ID;
     diameter = map.getFieldWidth()*map.diameterMultiplier;
-    
+
     // Gene der Eltern werden vermischt & mutiert
     eatingRate = mutate(mixGenes(f1, f2));
     maxVelocity = mutate(mixGenes(mG1, mG2));
@@ -95,31 +97,31 @@ public class Creature {
     generation = g+1;
 
     // furColour wird random aus beiden Elternteilen gewählt
-    if(random(0,1)>0.5){
+    if (random(0, 1)>0.5) {
       furColour = furColour1;
     } else {
       furColour = furColour2;
     }
     // Fellfarbe wird mutiert
     furColour = mutateFurColour(furColour);
-    
+
     // Gewichtmatrizen der Eltern werden vermischt & mutiert
-    NN = new NeuralNetwork(hLLength, mutate(mixMatrix(weights1,weights2)));
+    NN = new NeuralNetwork(hLLength, mutate(mixMatrix(weights1, weights2)));
 
     velocity = new PVector(maxVelocity, maxVelocity);
     velocity.limit(maxVelocity);
 
     position = new PVector(x, y);
-    
+
     sensor = new Sensor(this);
   }
 
- 
+
   // Kreatur wird gemalt
   public void drawCreature() {
     // Durchmesser an Energielevel angepasst
     diameter = map.stdDiameter * energy/2000 + 5 ;
-    
+
     // nach Angriff blinkt Kreatur 30 Frames rot
     if (redtime == 0) {
       fill(furColour);
@@ -135,10 +137,11 @@ public class Creature {
     }
     stroke(0);
     sensor.drawSensor();
+    if(sick)fill(0);
     // Körper
-    ellipse(position.x, position.y, diameter , diameter );
+    ellipse(position.x, position.y, diameter, diameter );
     // wenn in Top 10, dann werden Werte angezeigt
-    if(inTop10){
+    if (inTop10) {
       textSize(15*(diameter/(map.stdDiameter+5)));
       textAlign(CENTER);
       text("E: " + int(energy), position.x, position.y - 54);
@@ -148,10 +151,10 @@ public class Creature {
       text("A: " + round(attackValue*100)/100, position.x, position.y-10);
     }
   }
-  
-  void updateFitness(){
+
+  void updateFitness() {
     fitness = this.calculateFitnessStandard();
-    if(map.fitnessMaximum<fitness){
+    if (map.fitnessMaximum<fitness) {
       map.fitnessMaximum = fitness;
     }
   }
@@ -160,36 +163,36 @@ public class Creature {
   public void input() {
     // Werte auf 0 bis 1 genormt
     // Geschwindigkeit
-    NN.setInputNVelocity(map(velocity.mag()/maxVelocity, 0,1,-1,1));
+    NN.setInputNVelocity(map(velocity.mag()/maxVelocity, 0, 1, -1, 1));
     // eigene Energie
-    NN.setInputNEnergy(map(energy/maxEnergy,0,1,-1,1));
+    NN.setInputNEnergy(map(energy/maxEnergy, 0, 1, -1, 1));
     // Feldart
-    NN.setInputNFieldType(map(map.getField((int)position.x, (int)position.y).isLandInt(),0,1,-1,1));
+    NN.setInputNFieldType(map(map.getField((int)position.x, (int)position.y).isLandInt(), 0, 1, -1, 1));
     // Memory
     NN.setInputNMemory(memory);
     NN.setInputNMemory2(memory2);
     /*
     // Bias // immer 6
-    NN.setInputNBias(6);
-    // Richtung
-    NN.setInputNDirection(map(degrees(velocity.heading()), -180, 180, -6, 6));
-    // Paarungspartner/Gegner Fitness
-    */
+     NN.setInputNBias(6);
+     // Richtung
+     NN.setInputNDirection(map(degrees(velocity.heading()), -180, 180, -6, 6));
+     // Paarungspartner/Gegner Fitness
+     */
     Creature c = sensor.getSensorPartner();
-    if(c != null){
-      NN.setInputNPartnerFitness(map(c.fitness/map.fitnessMaximum,0,1,-1,1));
+    if (c != null) {
+      NN.setInputNPartnerFitness(map(c.fitness/map.fitnessMaximum, 0, 1, -1, 1));
     } else {
       NN.setInputNPartnerFitness(0);
     }
 
     //// Fühler
-    
+
     // Gegnerenergie
-    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy()/maxEnergy,0,1,-1,1));
+    NN.setInputNSensorEnemyEnergy(map(sensor.getSensorEnemyEnergy()/maxEnergy, 0, 1, -1, 1));
     // Feldenergie
-    NN.setInputNSensorFieldEnergy(map(sensor.getSensorFieldEnergy()/Field.maxOverallEnergy,0,1,-1,1));
+    NN.setInputNSensorFieldEnergy(map(sensor.getSensorFieldEnergy()/Field.maxOverallEnergy, 0, 1, -1, 1));
     // Feldart
-    NN.setInputNSensorFieldType(map(sensor.getSensorFieldType(),0,1,-1,1));
+    NN.setInputNSensorFieldType(map(sensor.getSensorFieldType(), 0, 1, -1, 1));
   }
 
   // Bewewgung
@@ -233,7 +236,7 @@ public class Creature {
 
       Creature victim = map.getCreature(victimPosition);
       // verhindert, dass Kreatur sich selbst angreift
-      if(victim==this){
+      if (victim==this) {
         victim = null;
       }
 
@@ -250,7 +253,13 @@ public class Creature {
 
   // Grundverbrauch
   public void live() {
-    energy -= energyConsumption*(age/7);
+    energy -= energyConsumption*(age/15);
+    if(sick){
+      energy -= energyConsumption * age/15;
+      if(random(0,1) < 0.001){
+        sick = false;
+      }
+    }
   }
   public void hit() {
     redtime = 30;
@@ -265,7 +274,7 @@ public class Creature {
     float maxV = ((this.getMaxVelocity() - World.stdMaxVelocity)/World.stdMaxVelocity)*2;
     float attack = ((this.getAttackValue() - World.stdAttackValue)/World.stdAttackValue)*2;
     float result = (bias + a + g + eatingRate + maxV + attack);
-    if(result < 0){
+    if (result < 0) {
       result = 0;
     }
     return result;
@@ -274,8 +283,8 @@ public class Creature {
   public void eat(float will) {
     Field field = map.getField((int)position.x, (int)position.y);
     if (will > 0.5 && field.isLand()) {
-      energy -= energyConsumption*(age/10);
-      
+      energy -= energyConsumption*(age/20);
+
       float newFieldEnergy = field.getEnergy() - eatingRate;
 
       if (newFieldEnergy>=0) { // Feld hat genug Energie
@@ -296,7 +305,7 @@ public class Creature {
   public boolean collision(Creature c) {
     return map.creatureDistance(this, c) <= diameter;
   }
-  
+
   public color mutateFurColour(color furColour) {
 
     float r = red(furColour) + red(furColour) * random(-0.3, 0.3);
@@ -320,20 +329,20 @@ public class Creature {
     }
     return color(r, g, b);
   }
-  
+
 
   // mutiert Gewichte
   public Matrix mutate(Matrix m) {
     for (int x=0; x<m.rows; x++) {
       for (int y=0; y<m.cols; y++) {
         if (random(0, 1)>0.3) {
-          float newValue = mutate(m.get(x,y));
-          if(newValue > 1){
+          float newValue = mutate(m.get(x, y));
+          if (newValue > 1) {
             newValue = 1;
-          }else if(newValue < 0){
+          } else if (newValue < 0) {
             newValue = 0;
           }
-          m.set(x,y,newValue);
+          m.set(x, y, newValue);
         }
       }
     }
@@ -344,42 +353,42 @@ public class Creature {
     if (x > 0 && random(0, 1)>0.5) {
       x += random(-mutationRate, mutationRate)*((log(x)/log(10))+1);
     }
-    if(x<0) x = 0;
+    if (x<0) x = 0;
     return x;
   }
   // mutiert ganze Matrix
-  public Matrix[] mutate(Matrix[] m){
+  public Matrix[] mutate(Matrix[] m) {
     Matrix[] returnMatrix = new Matrix[m.length];
-    for(int i=0; i<m.length; i++){
+    for (int i=0; i<m.length; i++) {
       returnMatrix[i] = mutate(m[i]);
     }
     return returnMatrix;
   }
   // vermischt zwei Matrizen
   public Matrix mixMatrix(Matrix c1, Matrix c2) { // nimmt an, dass c1 und c2 gleich gross sind
-    Matrix mixedMatrix = new Matrix(c1.rows,c1.cols);
+    Matrix mixedMatrix = new Matrix(c1.rows, c1.cols);
     mixedMatrix.copyM(c1);
     // mixedMatrix wird zu Kopie von c1
     // Gewichte werden vermischt
     for (int x=0; x<c1.rows; x++) {
       for (int y=0; y<c1.cols; y++) {
         if (random(0, 1) > mixingThreshold) {
-          mixedMatrix.set(x,y,c2.get(x,y));
+          mixedMatrix.set(x, y, c2.get(x, y));
         }
       }
     }
     return mixedMatrix;
   }
-  
+
   // vermischt zweit Matrizen-Arrays
-  public Matrix[] mixMatrix(Matrix[] m1, Matrix[] m2){
+  public Matrix[] mixMatrix(Matrix[] m1, Matrix[] m2) {
     Matrix[] returnMatrix = new Matrix[m1.length];
-    for(int i=0; i<returnMatrix.length; i++){
+    for (int i=0; i<returnMatrix.length; i++) {
       returnMatrix[i] = this.mixMatrix(m1[i], m2[i]);
     }
     return returnMatrix;
   }
-  
+
   public float mixGenes(float g1, float g2) {
     if (random(0, 1)>reproductionThreshold) {
       return g1;
@@ -388,7 +397,7 @@ public class Creature {
 
   public void age() {
     age += map.getTimePerFrame();
-    
+
     // Alter wird gerundet
     float newAge = (float)(age * map.getTimeMultiplier());
     age = (double)floor(newAge) / (double)map.getTimeMultiplier();
@@ -400,10 +409,10 @@ public class Creature {
       readyToGiveBirth = false;
     }
   }
-  
+
   ////speichern und laden
-  
-  
+
+
   public void memorise(float m, float m2) {
     memory = m;
     memory2 = m2;
@@ -461,7 +470,7 @@ public class Creature {
   public float getReproductionWaitingPeriod() {
     return reproductionWaitingPeriod;
   }
-  public int getID(){
+  public int getID() {
     return id;
   }
 }
