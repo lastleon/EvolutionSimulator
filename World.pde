@@ -10,6 +10,7 @@ public class World {
   final public static float stdEatingRate = 25;
   final public static float stdMaxVelocity = 2;
   final public static float stdAttackValue = 60;
+  final public static float stdImmuneValue = 100;
   float diameterMultiplier = 0.25;
 
   // Welt: Standard Werte
@@ -18,7 +19,7 @@ public class World {
   //// Welt
   // Welt
   Field[][] world;
-  ArrayList<Field> land;
+  //ArrayList<Field> land;
   float fW = 8;
   float worldBounds;
 
@@ -82,7 +83,7 @@ public class World {
     stdDiameter = fW * diameterMultiplier;
     worldBounds = worldSize*fW;
 
-    land = new ArrayList<Field>();
+    //land = new ArrayList<Field>();
 
     // generiert Welt
     world = new Field[worldSize][worldSize];
@@ -91,9 +92,6 @@ public class World {
       float xNoise = 0.0;
       for (int x=0; x<worldSize; x++) {
         world[x][y] = new Field(x*fW, y*fW, noise(xNoise, yNoise)*100, fW, x, y);
-        if (world[x][y].isLand()) {
-          land.add(world[x][y]);
-        }
         xNoise += 0.046;
       }
       yNoise += 0.046;
@@ -138,7 +136,7 @@ public class World {
       c2.addEnergy(-Creature.birthEnergy);
 
 
-      if(c1.sick || c2.sick && random(1) < 0.8){
+      if (c1.sick || c2.sick && random(1) < 0.8) {
         c1.sick = true;
         c2.sick = true;
       }
@@ -183,8 +181,10 @@ public class World {
     }
     if (floodOngoing) {
       floodDuration -= (float)timePerFrame;
-      for (Field f : land) {
-        f.influenceByWater();
+      for (int i = 0; i < world.length; i++) {
+        for (Field f : world[i]) {
+          f.influenceByWater();
+        }
       }
       if (floodDuration <= 0) {
         floodOngoing = false;
@@ -205,10 +205,10 @@ public class World {
     population.update();
     ArrayList<Creature> pop = population.getPopulation();
     for (Creature c : pop) {
-      if(c.sick){
-        for(Creature cr : population.query(c.position.x,c.position.y,(stdDiameter+5)*3)){
-          if(random(1) < 1/sq(c.position.dist(cr.position)))cr.sick = true;
-        } 
+      if (c.sick) {
+        for (Creature cr : population.query(c.position.x, c.position.y, (stdDiameter+5)*3)) {
+          if (random(1) < 1/sq(c.position.dist(cr.position)))cr.sick = true;
+        }
       }
       lookForMatingPartner(c);
       c.updated = false;
@@ -222,8 +222,10 @@ public class World {
     if (frameCount > 1) {
       growFields();
     } else {
-      for (Field f : land) {
-        f.influenceByWater();
+      for (int i = 0; i < world.length; i++) {
+        for (Field f : world[i]) {
+          f.influenceByWater();
+        }
       }
     }
 
@@ -262,7 +264,7 @@ public class World {
       }
 
       fitnessGPoints.add((float)year, totalFitness/populationCount);
-      oldestGPoints.add((float)year, populationCount);
+      oldestGPoints.add((float)year, max(populationCount,minPopulationSize));
       averageAgeGPoints.add((float)year, (float)totalAge/populationCount);
       generationGPoints.add((float)year, maxGeneration);
 
@@ -394,11 +396,15 @@ public class World {
   }
 
   public void growFields() {
-    for (Field f : land) {
-      f.influenceNeighbours();
+    for (int i = 0; i < world.length; i++) {
+      for (Field f : world[i]) {
+        f.influenceNeighbours();
+      }
     }
-    for (Field f : land) {
-      f.grow();
+    for (int i = 0; i < world.length; i++) {
+      for (Field f : world[i]) {
+        f.grow();
+      }
     }
   }
 

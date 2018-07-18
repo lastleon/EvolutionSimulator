@@ -16,6 +16,7 @@ public class Creature {
   float eatingRate = World.stdEatingRate; // GEN
   float maxVelocity = World.stdMaxVelocity; //GEN
   float attackValue = World.stdAttackValue; // GEN
+  float immuneValue = World.stdImmuneValue; // GEN
 
   //// wichtige Werte für die Kreatur
   color furColour;
@@ -80,6 +81,11 @@ public class Creature {
     sensor = new Sensor(this);
 
     furColour = color((int)random(0, 256), (int)random(0, 256), (int)random(0, 256));
+
+    eatingRate += random(-World.stdEatingRate/100,World.stdEatingRate/100); // GEN
+    maxVelocity += random(-World.stdMaxVelocity/100,World.stdMaxVelocity/100); //GEN
+    attackValue += random(-World.stdAttackValue/100,World.stdAttackValue/100); // GEN
+    immuneValue += random(-World.stdImmuneValue/100,World.stdImmuneValue/100); // GEN
   }
 
   // 2. Konstruktor, damit die Farbe bei den Nachkommen berücksichtigt werden kann und die Gewichte übergeben werden können
@@ -137,7 +143,7 @@ public class Creature {
     }
     stroke(0);
     sensor.drawSensor();
-    if(sick)fill(0);
+    if (sick)fill(0);
     // Körper
     ellipse(position.x, position.y, diameter, diameter );
     // wenn in Top 10, dann werden Werte angezeigt
@@ -254,9 +260,9 @@ public class Creature {
   // Grundverbrauch
   public void live() {
     energy -= energyConsumption*(age/15);
-    if(sick){
+    if (sick) {
       energy -= energyConsumption * age/15;
-      if(random(0,1) < 0.001){
+      if (random(immuneValue, 200) > 199) {
         sick = false;
       }
     }

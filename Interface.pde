@@ -10,8 +10,10 @@ class Interface extends PApplet {    //<>//
   Button bPopulation;
   Button bFlood;
   Button bGeneration;
+  Button switchSlider;
 
-  Slider sPopulation;
+  Slider slider;
+  int sliderState = 0;
 
   Label floodOngoing;
 
@@ -48,8 +50,9 @@ class Interface extends PApplet {    //<>//
     bPopulation = new Button(100, plotHeight, 100, 50, "Population", ButtonType.POPULATION);
     bFlood = new Button(width-100, height-50, 100, 50, "FLUT", ButtonType.FLOOD);
     bGeneration = new Button(100, plotHeight+50, 100, 50, "Generation", ButtonType.GENERATION);
+    switchSlider = new Button(width-100, height-100, 100, 50, "Change Slider", ButtonType.SWITCHSLIDER);
 
-    sPopulation = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 2, 380);
+    slider = new Slider(plotWidth+leftSpacing, plotHeight-150, 130, 65, 0, 2*map.minPopulationSize);
 
     buttons = new Button[] {bFitness, bAvgAge, bPopulation, bFlood, bGeneration}; // order must not be changed
 
@@ -63,7 +66,8 @@ class Interface extends PApplet {    //<>//
     stroke(0);
     line(plotWidth, 0, plotWidth, plotHeight);
     line(0, plotHeight, width, plotHeight);
-    map.minPopulationSize = (int)sPopulation.getValue();
+    if (sliderState == 0)map.minPopulationSize = (int)slider.getValue();
+    else if (sliderState == 1) oceanLevel = slider.getValue();
   }
 
   void drawPlot() {
@@ -95,15 +99,17 @@ class Interface extends PApplet {    //<>//
     text("Jahre: " + year/100, plotWidth + leftSpacing, upSpacing);
     text("Bewohner: " + map.populationCount, plotWidth + leftSpacing, upSpacing + 17 + lineSpacing);
     textSize(10);
-    text("Mindest-Bewohnerzahl: " + (int)sPopulation.getValue(), plotWidth + leftSpacing, upSpacing + 50 + lineSpacing);
+    if (sliderState == 0)text("Mindest-Bewohnerzahl: " + (int)slider.getValue(), plotWidth + leftSpacing, upSpacing + 50 + lineSpacing);
+    if (sliderState == 1)text("Meeresspiegelhöhe:  " + (int)slider.getValue(), plotWidth + leftSpacing, upSpacing + 50 + lineSpacing);
 
     bFitness.show();
     bAvgAge.show();
     bPopulation.show();
     bGeneration.show();
     bFlood.show();
+    switchSlider.show();
 
-    sPopulation.show();
+    slider.show();
 
     if (map.floodOngoing) {
       floodOngoing.show();
@@ -129,6 +135,16 @@ class Interface extends PApplet {    //<>//
       selectedButton = bGeneration.type;
     } else if (bFlood.isPressed()) {
       map.flood();
+    } else if (switchSlider.isPressed()) {
+      sliderState++;
+      sliderState %= 2;
+      if (sliderState == 0) {
+        slider.upperLimit = 2*map.minPopulationSize;
+        slider.setValue(map.minPopulationSize);
+      } else if (sliderState == 1) {
+        slider.upperLimit = 100;
+        slider.setValue(oceanLevel);
+      }
     }
 
     switch(selectedButton) {
@@ -146,11 +162,11 @@ class Interface extends PApplet {    //<>//
       break;
     }
 
-    sPopulation.changeValue();
+    slider.changeValue();
   }
 
   void mouseDragged() {
-    sPopulation.changeValue();
+    slider.changeValue();
   }
 
 
@@ -273,7 +289,7 @@ class Interface extends PApplet {    //<>//
       rect(posX, posY, sWidth, sHeight, 10);
       rectMode(CENTER);
       fill(155);
-      rect(posX + sWidth/2, posY+sHeight/2, sWidth-2*sliderWidth, sliderHeight*0.25,3);
+      rect(posX + sWidth/2, posY+sHeight/2, sWidth-2*sliderWidth, sliderHeight*0.25, 3);
       fill(sliderC);
       rect(sliderX, posY+sHeight/2, sliderWidth, sliderHeight, 5);
       noStroke();
@@ -285,6 +301,16 @@ class Interface extends PApplet {    //<>//
         sliderX = mouseX;
       }
       value = map(sliderX, posX+sliderWidth, posX+sWidth-sliderWidth, lowerLimit, upperLimit);
+    }
+
+    void setValue(float v) {
+      value = v;
+      sliderX = map(value, lowerLimit, upperLimit, posX+sliderWidth, posX+sWidth-sliderWidth);
+    }
+
+    void setValue(int v) {
+      value = v;
+      sliderX = map(value, lowerLimit, upperLimit, posX+sliderWidth, posX+sWidth-sliderWidth);
     }
 
     boolean isPressed() {

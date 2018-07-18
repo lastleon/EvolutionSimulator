@@ -4,7 +4,7 @@ import grafica.*;
 
 //    ! Reihenfolge darf nicht verändert werden !    //
 enum ButtonType {
-  FITNESS, AVGAGE, POPULATION, FLOOD, GENERATION
+  FITNESS, AVGAGE, POPULATION, FLOOD, GENERATION, SWITCHSLIDER
 };
 
 //// Outputs zum speichern der Daten
@@ -76,7 +76,7 @@ void setup() {
   noStroke();
   loop();
   // Welt erstellt
-  map = new World(125, 1); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
+  map = new World(125, 100); // Darf nicht 10 sein, sonst hängt sich die Simulation auf (??????)
 
   // Interface (neuesFenster) erstellt
   iface = new Interface();
