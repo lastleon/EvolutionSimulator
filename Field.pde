@@ -26,35 +26,34 @@ class Field {
     arrayPosX = aX;
     arrayPosY = aY;
     influencingValues = new float[4];
-
+    maxEnergyValue = maxOverallEnergy;
     if (this.isLand()) {
-      maxEnergyValue = maxOverallEnergy;
       influenceable = true;
     } else {
-      maxRegenerationrate = 0;
-      maxEnergyValue = 0;
       influenceable = false;
     }
   }
 
   // Wachstumsalgorithmus
   public void grow() {
-    if (influenceable && noiseHeight>oceanLevel) {
-      regenerationrate = 0;
-      float rest = maxRegenerationrate;
-      influencingValues = sort(influencingValues);
-      for (int i = 3; i >= 0; i--) { 
-        if (influencingValues[i] > random(0.5, 0.8)) {
-          regenerationrate += influencingValues[i] * rest;
+    if (noiseHeight>oceanLevel) {
+      if (influenceable) {
+        regenerationrate = 0;
+        float rest = maxRegenerationrate;
+        influencingValues = sort(influencingValues);
+        for (int i = 3; i >= 0; i--) { 
+          if (influencingValues[i] > random(0.5, 0.8)) {
+            regenerationrate += influencingValues[i] * rest;
+          }
+          rest = maxRegenerationrate - regenerationrate;
         }
-        rest = maxRegenerationrate - regenerationrate;
       }
-    }
-    regenerationrate *= stdOceanLevel+20/noiseHeight;
-    if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
+      regenerationrate *= sq(oceanLevel+10/noiseHeight);
+      if (regenerationrate>maxRegenerationrate)regenerationrate = maxRegenerationrate;
 
-    energyValue += regenerationrate;
-    if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
+      energyValue += regenerationrate;
+      if (energyValue > maxEnergyValue)energyValue = maxEnergyValue;
+    } else energyValue = 0;
   }
 
   public boolean isLand() {

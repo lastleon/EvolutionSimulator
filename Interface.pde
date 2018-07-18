@@ -139,7 +139,7 @@ class Interface extends PApplet {    //<>//
       sliderState++;
       sliderState %= 2;
       if (sliderState == 0) {
-        slider.upperLimit = 2*map.minPopulationSize;
+        slider.upperLimit = max(2*map.minPopulationSize,5);
         slider.setValue(map.minPopulationSize);
       } else if (sliderState == 1) {
         slider.upperLimit = 100;
